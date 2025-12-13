@@ -1,0 +1,389 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shyam Medical - Trusted Healthcare Services</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #1e40af;
+            --secondary-blue: #3b82f6;
+            --light-blue: #dbeafe;
+            --trust-blue: #2563eb;
+            --dark-blue: #1e3a8a;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            scroll-behavior: smooth;
+        }
+        
+        h1, h2, h3, h4, h5 {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .trust-bg {
+            background-color: var(--light-blue);
+        }
+        
+        .trust-border {
+            border-color: var(--trust-blue);
+        }
+        
+        .trust-text {
+            color: var(--trust-blue);
+        }
+        
+        .mobile-menu {
+            transition: all 0.3s ease;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.1);
+        }
+        
+        .doctor-card:hover img {
+            transform: scale(1.05);
+            transition: transform 0.5s ease;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <!-- Header & Navigation -->
+    <header class="sticky top-0 z-50 bg-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2">
+                    <div class="bg-blue-600 text-white p-2 rounded-lg">
+                        <i class="fas fa-heartbeat text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-blue-900">Shyam Medical</h1>
+                        <p class="text-xs text-blue-600">Trusted Healthcare Since 1995</p>
+                    </div>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="index.html#home" class="font-medium text-blue-900 hover:text-blue-600">Home</a>
+                    <a href="index.html#about" class="font-medium text-gray-700 hover:text-blue-600">About</a>
+                    <a href="index.html#services" class="font-medium text-gray-700 hover:text-blue-600">Services</a>
+                    <a href="index.html#doctors" class="font-medium text-gray-700 hover:text-blue-600">Doctors</a>
+                    <a href="index.html#contact" class="font-medium text-gray-700 hover:text-blue-600">Contact</a>
+                </nav>
+                
+                <!-- Call to Action Button -->
+                <div class="hidden md:block">
+                    <a href="index.html#contact" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+                        <i class="fas fa-calendar-check mr-2"></i>Book Appointment
+                    </a>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-button" class="md:hidden text-blue-900 text-2xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <!-- Mobile Menu (Hidden by default) -->
+            <div id="mobile-menu" class="mobile-menu hidden md:hidden py-4 border-t">
+                <div class="flex flex-col space-y-4">
+                    <a href="index.html#home" class="font-medium text-blue-900 py-2">Home</a>
+                    <a href="index.html#about" class="font-medium text-gray-700 py-2">About</a>
+                    <a href="index.html#services" class="font-medium text-gray-700 py-2">Services</a>
+                    <a href="index.html#doctors" class="font-medium text-gray-700 py-2">Doctors</a>
+                    <a href="index.html#contact" class="font-medium text-gray-700 py-2">Contact</a>
+                    <a href="index.html#contact" class="bg-blue-600 text-white font-medium py-3 px-4 rounded-lg text-center">
+                        <i class="fas fa-calendar-check mr-2"></i>Book Appointment
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="trust-bg py-12 md:py-20">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h2 class="text-4xl md:text-5xl font-bold text-blue-900 mb-6">Quality Healthcare You Can Trust</h2>
+                    <p class="text-lg text-gray-700 mb-8">At Shyam Medical, we provide compassionate, comprehensive medical care for you and your family. Our experienced team is dedicated to your health and well-being.</p>
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <a href="#contact" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg text-center transition duration-300">
+                            <i class="fas fa-calendar-alt mr-2"></i>Book Appointment
+                        </a>
+                        <a href="#services" class="bg-white hover:bg-gray-100 text-blue-600 font-medium py-3 px-8 rounded-lg border border-blue-600 text-center transition duration-300">
+                            <i class="fas fa-stethoscope mr-2"></i>Our Services
+                        </a>
+                    </div>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Doctor and patient" class="rounded-lg shadow-2xl max-w-full h-auto">
+                        <div class="absolute -bottom-4 -left-4 bg-white p-4 rounded-lg shadow-lg">
+                            <div class="flex items-center">
+                                <div class="bg-blue-100 p-3 rounded-full mr-3">
+                                    <i class="fas fa-user-md text-blue-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-blue-900">24/7 Emergency</h4>
+                                    <p class="text-sm text-gray-600">Always here for you</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+ 
+ <!-- Cardiology Page -->
+        <div id="cardiology-page" class="page">
+            <section class="py-16 bg-white">
+                <div class="container mx-auto px-4">
+                    <h1 class="text-4xl font-bold text-blue-900 mb-2">Cardiology Services</h1>
+                    <p class="text-gray-600 mb-12 max-w-3xl">Comprehensive heart care for all your cardiovascular needs, from prevention to advanced treatment.</p>
+                    
+                    <div class="flex flex-col lg:flex-row gap-8">
+                        <div class="lg:w-2/3">
+                            <div class="bg-blue-50 p-8 rounded-lg mb-8">
+                                <h2 class="text-2xl font-bold text-blue-900 mb-4">About Our Cardiology Department</h2>
+                                <p class="text-gray-700 mb-6">Our Cardiology Department is equipped with state-of-the-art technology and staffed by experienced cardiologists who provide comprehensive care for all heart-related conditions. We focus on prevention, early detection, and effective treatment of cardiovascular diseases.</p>
+                                <p class="text-gray-700">We offer a full spectrum of cardiac services, from non-invasive diagnostics to advanced interventional procedures. Our team works collaboratively to develop personalized treatment plans for each patient, ensuring the best possible outcomes.</p>
+                            </div>
+                            
+                            <div class="mb-12">
+                                <h2 class="text-2xl font-bold text-blue-900 mb-6">Cardiology Services We Offer</h2>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                                        <div class="flex items-start mb-4">
+                                            <div class="bg-blue-100 p-3 rounded-full mr-4">
+                                                <i class="fas fa-heart text-blue-600"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-xl font-bold text-blue-900 mb-2">Cardiac Diagnostics</h3>
+                                                <p class="text-gray-600">ECG, Echocardiography, Stress Tests, Holter Monitoring</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                                        <div class="flex items-start mb-4">
+                                            <div class="bg-blue-100 p-3 rounded-full mr-4">
+                                                <i class="fas fa-stethoscope text-blue-600"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-xl font-bold text-blue-900 mb-2">Interventional Cardiology</h3>
+                                                <p class="text-gray-600">Angioplasty, Stent Placement, Cardiac Catheterization</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                                        <div class="flex items-start mb-4">
+                                            <div class="bg-blue-100 p-3 rounded-full mr-4">
+                                                <i class="fas fa-heartbeat text-blue-600"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-xl font-bold text-blue-900 mb-2">Preventive Cardiology</h3>
+                                                <p class="text-gray-600">Risk Assessment, Lifestyle Counseling, Cholesterol Management</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                                        <div class="flex items-start mb-4">
+                                            <div class="bg-blue-100 p-3 rounded-full mr-4">
+                                                <i class="fas fa-clipboard-check text-blue-600"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-xl font-bold text-blue-900 mb-2">Cardiac Rehabilitation</h3>
+                                                <p class="text-gray-600">Supervised Exercise Programs, Education, Psychological Support</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="lg:w-1/3">
+                            <div class="bg-blue-50 p-6 rounded-lg mb-8">
+                                <h3 class="text-xl font-bold text-blue-900 mb-4">Our Cardiologists</h3>
+                                <div class="space-y-4">
+                                    <div class="flex items-center bg-white p-4 rounded-lg">
+                                        <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" alt="Dr. Sharma" class="w-16 h-16 rounded-full object-cover mr-4">
+                                        <div>
+                                            <h4 class="font-bold text-blue-900">Dr. Rajesh Sharma</h4>
+                                            <p class="text-sm text-gray-600">Senior Cardiologist</p>
+                                            <p class="text-sm text-blue-600">MBBS, MD, DM Cardiology</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center bg-white p-4 rounded-lg">
+                                        <img src="https://images.unsplash.com/photo-1551601651-2a8555f1a136?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" alt="Dr. Verma" class="w-16 h-16 rounded-full object-cover mr-4">
+                                        <div>
+                                            <h4 class="font-bold text-blue-900">Dr. Anil Verma</h4>
+                                            <p class="text-sm text-gray-600">Interventional Cardiologist</p>
+                                            <p class="text-sm text-blue-600">MBBS, MD, DM Cardiology</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-blue-900 text-white p-6 rounded-lg">
+                                <h3 class="text-xl font-bold mb-4">Book Cardiology Appointment</h3>
+                                <p class="mb-6">Schedule a consultation with our cardiology experts for heart health assessment and treatment.</p>
+                                <a href="#" class="appointment-btn bg-white text-blue-900 hover:bg-gray-100 font-medium py-3 px-6 rounded-lg text-center block transition duration-300">
+                                    <i class="fas fa-calendar-check mr-2"></i>Book Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+         <!-- Footer -->
+    <footer class="bg-blue-900 text-white pt-12 pb-6">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+                <div>
+                    <div class="flex items-center space-x-2 mb-6">
+                        <div class="bg-white text-blue-900 p-2 rounded-lg">
+                            <i class="fas fa-heartbeat text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold">Shyam Medical</h2>
+                            <p class="text-blue-200 text-sm">Trusted Healthcare Since 1995</p>
+                        </div>
+                    </div>
+                    <p class="text-blue-200 mb-6">Providing compassionate, comprehensive medical care with integrity and excellence for over 25 years.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="bg-blue-800 hover:bg-blue-700 w-10 h-10 rounded-full flex items-center justify-center">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="bg-blue-800 hover:bg-blue-700 w-10 h-10 rounded-full flex items-center justify-center">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="bg-blue-800 hover:bg-blue-700 w-10 h-10 rounded-full flex items-center justify-center">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="bg-blue-800 hover:bg-blue-700 w-10 h-10 rounded-full flex items-center justify-center">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-6">Quick Links</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#home" class="text-blue-200 hover:text-white">Home</a></li>
+                        <li><a href="#about" class="text-blue-200 hover:text-white">About Us</a></li>
+                        <li><a href="#services" class="text-blue-200 hover:text-white">Services</a></li>
+                        <li><a href="#doctors" class="text-blue-200 hover:text-white">Our Doctors</a></li>
+                        <li><a href="#contact" class="text-blue-200 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-6">Our Services</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-blue-200 hover:text-white">Cardiology</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-white">Neurology</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-white">Orthopedics</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-white">Pediatrics</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-white">Ophthalmology</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-6">Newsletter</h3>
+                    <p class="text-blue-200 mb-4">Subscribe to our newsletter for health tips and updates.</p>
+                    <form class="flex">
+                        <input type="email" placeholder="Your email" class="px-4 py-3 rounded-l-lg w-full text-gray-800 focus:outline-none">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-500 px-4 rounded-r-lg">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="border-t border-blue-800 pt-6 text-center text-blue-200">
+                <p>&copy; 2023 Shyam Medical. All rights reserved. | Designed with <i class="fas fa-heart text-red-400"></i> for better healthcare</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+            const icon = mobileMenuButton.querySelector('i');
+            if (mobileMenu.classList.contains('hidden')) {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            } else {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            }
+        });
+        
+        // Close mobile menu when clicking a link
+        const mobileMenuLinks = mobileMenu.querySelectorAll('a');
+        mobileMenuLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                mobileMenu.classList.add('hidden');
+                const icon = mobileMenuButton.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            });
+        });
+        
+        // Appointment form submission
+        const appointmentForm = document.getElementById('appointment-form');
+        appointmentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('name').value;
+            const service = document.getElementById('service').value;
+            
+            // In a real application, you would send this data to a server
+            // For this demo, we'll just show an alert
+            alert(`Thank you, ${name}! Your appointment request for ${service} has been received. We will contact you shortly to confirm.`);
+            
+            // Reset form
+            appointmentForm.reset();
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
