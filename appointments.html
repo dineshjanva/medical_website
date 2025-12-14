@@ -1,0 +1,2179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shyam Medical - Appointments Management</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Flatpickr for date selection -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #1e40af;
+            --secondary-blue: #3b82f6;
+            --light-blue: #dbeafe;
+            --trust-blue: #2563eb;
+            --dark-blue: #1e3a8a;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f3f4f6;
+        }
+        
+        h1, h2, h3, h4, h5 {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        
+        .appointment-card {
+            transition: all 0.3s ease;
+            border-left-width: 4px;
+        }
+        
+        .appointment-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+        
+        .scheduled {
+            border-left-color: #3b82f6;
+        }
+        
+        .completed {
+            border-left-color: #10b981;
+        }
+        
+        .cancelled {
+            border-left-color: #ef4444;
+        }
+        
+        .no-show {
+            border-left-color: #f59e0b;
+        }
+        
+        .in-progress {
+            border-left-color: #8b5cf6;
+        }
+        
+        .upcoming {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        
+        .calendar-day {
+            transition: all 0.2s ease;
+        }
+        
+        .calendar-day:hover {
+            background-color: #dbeafe;
+        }
+        
+        .calendar-day.today {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .calendar-day.has-appointments {
+            background-color: #bfdbfe;
+        }
+        
+        .calendar-day.selected {
+            background-color: #1d4ed8;
+            color: white;
+        }
+        
+        .time-slot {
+            transition: all 0.2s ease;
+        }
+        
+        .time-slot:hover {
+            background-color: #dbeafe;
+        }
+        
+        .time-slot.selected {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .time-slot.booked {
+            background-color: #fca5a5;
+            color: #7f1d1d;
+            cursor: not-allowed;
+        }
+        
+        .time-slot.available {
+            background-color: #bbf7d0;
+            color: #14532d;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .close-modal {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close-modal:hover {
+            color: #000;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .filter-active {
+            background-color: #3b82f6 !important;
+            color: white !important;
+        }
+        
+        /* Calendar styling */
+        .calendar-container {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .calendar-header {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .calendar-day-header {
+            background-color: #eff6ff;
+            font-weight: 600;
+        }
+        
+        .day-appointment-indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin: 0 auto;
+            margin-top: 2px;
+        }
+        
+        .day-appointment-indicator.scheduled {
+            background-color: #3b82f6;
+        }
+        
+        .day-appointment-indicator.completed {
+            background-color: #10b981;
+        }
+        
+        .day-appointment-indicator.cancelled {
+            background-color: #ef4444;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <!-- Dashboard Container -->
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar bg-blue-900 text-white w-64 flex-shrink-0 overflow-y-auto">
+            <!-- Logo -->
+            <div class="p-6 border-b border-blue-800">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white text-blue-900 p-2 rounded-lg">
+                        <i class="fas fa-heartbeat text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Shyam Medical</h1>
+                        <p class="text-xs text-blue-200">Admin Dashboard</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="Dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-800">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="medicine.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-800">
+                            <i class="fas fa-capsules"></i>
+                            <span>Medicine Stock</span>
+                        </a>
+                    </li>
+                    <!-- <li>
+                        <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-800">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li> -->
+                    <!-- <li>
+                        <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-800">
+                            <i class="fas fa-users"></i>
+                            <span>Patients</span>
+                        </a>
+                    </li> -->
+                    <li>
+                        <a href="appointments.html" class="flex items-center space-x-3 p-3 rounded-lg bg-blue-800">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Appointments</span>
+                        </a>
+                    </li>
+                    <!-- <li>
+                        <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-800">
+                            <i class="fas fa-user-md"></i>
+                            <span>Doctors</span>
+                        </a>
+                    </li> -->
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-800">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Logout -->
+                <div class="mt-8 p-4 border-t border-blue-800">
+                    <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-800">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm border-b">
+                <div class="flex justify-between items-center p-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-blue-900">Appointments Management</h2>
+                        <p class="text-gray-600">Schedule, manage, and track patient appointments</p>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <!-- Date Display -->
+                        <div class="hidden md:block bg-blue-50 px-4 py-2 rounded-lg">
+                            <p class="text-sm text-gray-600">Today</p>
+                            <p class="font-medium" id="current-date">Loading...</p>
+                        </div>
+                        
+                        <!-- User Profile -->
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user-md text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">Appointment Manager</p>
+                                <p class="text-sm text-gray-600">Reception</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Main Content -->
+            <main class="p-6">
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Today's Appointments -->
+                    <div class="appointment-card bg-white rounded-xl p-6 shadow-md">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-500 text-sm">Today's Appointments</p>
+                                <p class="text-3xl font-bold text-blue-900 mt-2">24</p>
+                                <p class="text-blue-500 text-sm mt-1">
+                                    <i class="fas fa-clock mr-1"></i> 8 completed, 16 pending
+                                </p>
+                            </div>
+                            <div class="bg-blue-100 p-3 rounded-lg">
+                                <i class="fas fa-calendar-day text-blue-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- This Week -->
+                    <div class="appointment-card bg-white rounded-xl p-6 shadow-md">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-500 text-sm">This Week</p>
+                                <p class="text-3xl font-bold text-blue-900 mt-2">78</p>
+                                <p class="text-green-500 text-sm mt-1">
+                                    <i class="fas fa-arrow-up mr-1"></i> 12% from last week
+                                </p>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-lg">
+                                <i class="fas fa-calendar-week text-green-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pending -->
+                    <div class="appointment-card bg-white rounded-xl p-6 shadow-md">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-500 text-sm">Pending</p>
+                                <p class="text-3xl font-bold text-yellow-600 mt-2">42</p>
+                                <p class="text-yellow-500 text-sm mt-1">
+                                    <i class="fas fa-clock mr-1"></i> Require confirmation
+                                </p>
+                            </div>
+                            <div class="bg-yellow-100 p-3 rounded-lg">
+                                <i class="fas fa-hourglass-half text-yellow-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cancellations -->
+                    <div class="appointment-card bg-white rounded-xl p-6 shadow-md">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-500 text-sm">Cancellations</p>
+                                <p class="text-3xl font-bold text-red-600 mt-2">5</p>
+                                <p class="text-red-500 text-sm mt-1">
+                                    <i class="fas fa-times-circle mr-1"></i> This week
+                                </p>
+                            </div>
+                            <div class="bg-red-100 p-3 rounded-lg">
+                                <i class="fas fa-calendar-times text-red-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Search and Filter Section -->
+                <div class="bg-white rounded-xl p-6 shadow-md mb-8">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-blue-900 mb-4 lg:mb-0">Search & Filter Appointments</h3>
+                        <button id="new-appointment-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+                            <i class="fas fa-plus-circle mr-2"></i>New Appointment
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <!-- Search Input -->
+                        <div class="lg:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                            <div class="relative">
+                                <input type="text" id="search-appointment" placeholder="Search by patient name, phone, email, or appointment ID..." class="w-full pl-12 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <i class="fas fa-search absolute left-4 top-3 text-gray-400"></i>
+                                <button id="clear-search" class="absolute right-4 top-3 text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Date Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                            <input type="text" id="filter-date" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Select date">
+                        </div>
+                        
+                        <!-- Doctor Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Doctor</label>
+                            <select id="filter-doctor" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="all">All Doctors</option>
+                                <option value="dr-sharma">Dr. Rajesh Sharma</option>
+                                <option value="dr-patel">Dr. Priya Patel</option>
+                                <option value="dr-kumar">Dr. Amit Kumar</option>
+                                <option value="dr-gupta">Dr. Sunita Gupta</option>
+                                <option value="dr-mehta">Dr. Anjali Mehta</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <!-- Status Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                            <select id="filter-status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="all">All Status</option>
+                                <option value="scheduled">Scheduled</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                                <option value="no-show">No Show</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Type Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Appointment Type</label>
+                            <select id="filter-type" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="all">All Types</option>
+                                <option value="consultation">Consultation</option>
+                                <option value="follow-up">Follow-up</option>
+                                <option value="emergency">Emergency</option>
+                                <option value="checkup">Checkup</option>
+                                <option value="procedure">Procedure</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Time Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Time of Day</label>
+                            <select id="filter-time" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="all">All Day</option>
+                                <option value="morning">Morning (8AM-12PM)</option>
+                                <option value="afternoon">Afternoon (12PM-4PM)</option>
+                                <option value="evening">Evening (4PM-8PM)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Sort By -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+                            <select id="sort-by" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="date-asc">Date (Oldest First)</option>
+                                <option value="date-desc">Date (Newest First)</option>
+                                <option value="patient">Patient Name (A-Z)</option>
+                                <option value="doctor">Doctor Name (A-Z)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- View Toggle -->
+                        <div class="flex items-end">
+                            <div class="w-full">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">View</label>
+                                <div class="flex border border-gray-300 rounded-lg overflow-hidden">
+                                    <button id="view-list" class="flex-1 py-2 text-center bg-blue-600 text-white">
+                                        <i class="fas fa-list"></i>
+                                    </button>
+                                    <button id="view-calendar" class="flex-1 py-2 text-center bg-gray-100 text-gray-700">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Filter Buttons -->
+                    <div class="flex flex-wrap gap-2 mt-6">
+                        <button class="filter-btn px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200" data-filter="today">
+                            <i class="fas fa-calendar-day mr-1"></i>Today
+                        </button>
+                        <button class="filter-btn px-4 py-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200" data-filter="tomorrow">
+                            <i class="fas fa-calendar-plus mr-1"></i>Tomorrow
+                        </button>
+                        <button class="filter-btn px-4 py-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200" data-filter="upcoming">
+                            <i class="fas fa-clock mr-1"></i>Upcoming
+                        </button>
+                        <button class="filter-btn px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200" data-filter="cancelled">
+                            <i class="fas fa-times-circle mr-1"></i>Cancelled
+                        </button>
+                        <button class="filter-btn px-4 py-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200" data-filter="no-show">
+                            <i class="fas fa-user-times mr-1"></i>No Shows
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Appointments List View -->
+                <div id="list-view" class="bg-white rounded-xl p-6 shadow-md mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-blue-900">Appointments List</h3>
+                        <div class="flex items-center space-x-2">
+                            <p class="text-gray-600 text-sm">Showing</p>
+                            <select id="items-per-page" class="px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                            <p class="text-gray-600 text-sm">appointments</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Appointments Count -->
+                    <div class="mb-4">
+                        <p class="text-gray-600">
+                            <span id="appointment-count" class="font-bold">142</span> appointments found
+                            <span id="filtered-count" class="hidden"> (filtered from 142)</span>
+                        </p>
+                    </div>
+                    
+                    <!-- Appointments Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-blue-50">
+                                    <th class="text-left p-4 font-medium text-blue-900">Patient & Appointment</th>
+                                    <th class="text-left p-4 font-medium text-blue-900">Doctor</th>
+                                    <th class="text-left p-4 font-medium text-blue-900">Date & Time</th>
+                                    <th class="text-left p-4 font-medium text-blue-900">Status</th>
+                                    <th class="text-left p-4 font-medium text-blue-900">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointments-table-body">
+                                <!-- Appointments will be dynamically added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div id="no-results" class="hidden text-center py-12">
+                        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-calendar-times text-gray-400 text-3xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-700 mb-2">No appointments found</h4>
+                        <p class="text-gray-500 max-w-md mx-auto mb-6">Try adjusting your search or filter to find what you're looking for.</p>
+                        <button id="reset-filters" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+                            Reset All Filters
+                        </button>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="flex justify-between items-center mt-6">
+                        <div class="text-gray-600 text-sm">
+                            Showing <span id="page-start">1</span> to <span id="page-end">10</span> of <span id="total-appointments">142</span> appointments
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <button id="prev-page" class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div id="page-numbers" class="flex space-x-1">
+                                <!-- Page numbers will be dynamically added here -->
+                            </div>
+                            <button id="next-page" class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Calendar View (Initially Hidden) -->
+                <div id="calendar-view" class="hidden">
+                    <div class="calendar-container mb-8">
+                        <div class="calendar-header p-4 flex justify-between items-center">
+                            <div>
+                                <h3 class="text-xl font-bold">Appointments Calendar</h3>
+                                <p class="text-blue-100">View and manage appointments by date</p>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <button id="prev-month" class="text-white hover:text-blue-200">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <h4 id="current-month" class="text-xl font-bold">October 2023</h4>
+                                <button id="next-month" class="text-white hover:text-blue-200">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                                <button id="today-btn" class="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium">
+                                    Today
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4">
+                            <!-- Calendar Days Header -->
+                            <div class="grid grid-cols-7 gap-1 mb-2">
+                                <div class="calendar-day-header p-3 text-center text-sm">Sun</div>
+                                <div class="calendar-day-header p-3 text-center text-sm">Mon</div>
+                                <div class="calendar-day-header p-3 text-center text-sm">Tue</div>
+                                <div class="calendar-day-header p-3 text-center text-sm">Wed</div>
+                                <div class="calendar-day-header p-3 text-center text-sm">Thu</div>
+                                <div class="calendar-day-header p-3 text-center text-sm">Fri</div>
+                                <div class="calendar-day-header p-3 text-center text-sm">Sat</div>
+                            </div>
+                            
+                            <!-- Calendar Days -->
+                            <div id="calendar-days" class="grid grid-cols-7 gap-1">
+                                <!-- Calendar days will be dynamically added here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Selected Day Appointments -->
+                    <div id="selected-day-appointments" class="hidden bg-white rounded-xl p-6 shadow-md mb-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-blue-900" id="selected-day-title">Appointments for October 15, 2023</h3>
+                            <button id="add-appointment-day" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300">
+                                <i class="fas fa-plus mr-2"></i>Add Appointment
+                            </button>
+                        </div>
+                        
+                        <div id="day-appointments-list">
+                            <!-- Day appointments will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upcoming Appointments -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Today's Schedule -->
+                    <div class="bg-white rounded-xl p-6 shadow-md">
+                        <h3 class="text-xl font-bold text-blue-900 mb-6">Today's Schedule</h3>
+                        <div id="today-schedule" class="space-y-4">
+                            <!-- Today's appointments will be dynamically added here -->
+                        </div>
+                        <div class="text-center mt-6">
+                            <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">
+                                <i class="fas fa-eye mr-1"></i> View Full Schedule
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Doctor Availability -->
+                    <div class="bg-white rounded-xl p-6 shadow-md">
+                        <h3 class="text-xl font-bold text-blue-900 mb-6">Doctor Availability</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-user-md text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Dr. Rajesh Sharma</p>
+                                        <p class="text-sm text-gray-500">Cardiologist</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-medium text-green-600">Available</p>
+                                    <p class="text-sm text-gray-500">8 appointments</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-user-md text-purple-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Dr. Priya Patel</p>
+                                        <p class="text-sm text-gray-500">Neurologist</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-medium text-yellow-600">Limited</p>
+                                    <p class="text-sm text-gray-500">2 slots left</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-user-md text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Dr. Amit Kumar</p>
+                                        <p class="text-sm text-gray-500">Orthopedic Surgeon</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-medium text-green-600">Available</p>
+                                    <p class="text-sm text-gray-500">6 appointments</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-user-md text-pink-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Dr. Sunita Gupta</p>
+                                        <p class="text-sm text-gray-500">Pediatrician</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-medium text-red-600">Booked</p>
+                                    <p class="text-sm text-gray-500">No slots today</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-6">
+                            <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">
+                                <i class="fas fa-calendar-alt mr-1"></i> View All Doctors
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-xl p-6 shadow-md">
+                        <h3 class="text-xl font-bold text-blue-900 mb-6">Quick Actions</h3>
+                        <div class="space-y-4">
+                            <button class="w-full flex items-center justify-between p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition duration-300">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-phone-alt text-blue-600"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <p class="font-medium">Confirm Appointments</p>
+                                        <p class="text-sm text-gray-500">12 pending confirmations</p>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right text-blue-600"></i>
+                            </button>
+                            
+                            <button class="w-full flex items-center justify-between p-4 bg-green-50 hover:bg-green-100 rounded-lg transition duration-300">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-sms text-green-600"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <p class="font-medium">Send Reminders</p>
+                                        <p class="text-sm text-gray-500">Tomorrow's appointments</p>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right text-green-600"></i>
+                            </button>
+                            
+                            <button class="w-full flex items-center justify-between p-4 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition duration-300">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-file-invoice text-yellow-600"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <p class="font-medium">Generate Reports</p>
+                                        <p class="text-sm text-gray-500">Monthly appointments report</p>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right text-yellow-600"></i>
+                            </button>
+                            
+                            <button class="w-full flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition duration-300">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-print text-purple-600"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <p class="font-medium">Print Schedule</p>
+                                        <p class="text-sm text-gray-500">Today's appointments</p>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right text-purple-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            
+            <!-- Footer -->
+            <footer class="bg-white border-t p-4">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-600 text-sm">© 2023 Shyam Medical - Appointments Management System</p>
+                    <p class="text-gray-600 text-sm">Last updated: <span id="last-updated">Just now</span></p>
+                </div>
+            </footer>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Appointment Modal -->
+    <div id="appointment-modal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h3 class="text-2xl font-bold text-blue-900" id="modal-title">Schedule New Appointment</h3>
+                <span class="close-modal text-2xl">&times;</span>
+            </div>
+            
+            <form id="appointment-form" class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Patient Selection -->
+                    <div class="md:col-span-2">
+                        <label for="patient-select" class="block text-gray-700 font-medium mb-2">Select Patient *</label>
+                        <div class="flex">
+                            <select id="patient-select" class="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Select existing patient</option>
+                                <option value="patient-1">Rahul Kumar (M, 45) - Phone: 9876543210</option>
+                                <option value="patient-2">Priya Sharma (F, 32) - Phone: 9876543211</option>
+                                <option value="patient-3">Amit Patel (M, 28) - Phone: 9876543212</option>
+                                <option value="patient-4">Sunita Gupta (F, 56) - Phone: 9876543213</option>
+                                <option value="patient-5">Ramesh Singh (M, 62) - Phone: 9876543214</option>
+                            </select>
+                            <button type="button" id="new-patient-btn" class="px-4 py-3 bg-gray-100 border border-gray-300 rounded-r-lg hover:bg-gray-200">
+                                <i class="fas fa-user-plus"></i>
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">Or <a href="#" class="text-blue-600 hover:underline">register a new patient</a></p>
+                    </div>
+                    
+                    <!-- Doctor Selection -->
+                    <div>
+                        <label for="doctor-select" class="block text-gray-700 font-medium mb-2">Select Doctor *</label>
+                        <select id="doctor-select" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <option value="">Select Doctor</option>
+                            <option value="dr-sharma">Dr. Rajesh Sharma - Cardiologist</option>
+                            <option value="dr-patel">Dr. Priya Patel - Neurologist</option>
+                            <option value="dr-kumar">Dr. Amit Kumar - Orthopedic Surgeon</option>
+                            <option value="dr-gupta">Dr. Sunita Gupta - Pediatrician</option>
+                            <option value="dr-mehta">Dr. Anjali Mehta - Ophthalmologist</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Appointment Type -->
+                    <div>
+                        <label for="appointment-type" class="block text-gray-700 font-medium mb-2">Appointment Type *</label>
+                        <select id="appointment-type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <option value="">Select Type</option>
+                            <option value="consultation">Consultation</option>
+                            <option value="follow-up">Follow-up</option>
+                            <option value="emergency">Emergency</option>
+                            <option value="checkup">Checkup</option>
+                            <option value="procedure">Procedure</option>
+                            <option value="test">Test/Diagnostic</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Date Selection -->
+                    <div>
+                        <label for="appointment-date" class="block text-gray-700 font-medium mb-2">Date *</label>
+                        <input type="text" id="appointment-date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Select date" required>
+                    </div>
+                    
+                    <!-- Time Selection -->
+                    <div>
+                        <label for="appointment-time" class="block text-gray-700 font-medium mb-2">Time *</label>
+                        <select id="appointment-time" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <option value="">Select Time</option>
+                            <optgroup label="Morning">
+                                <option value="09:00">09:00 AM</option>
+                                <option value="09:30">09:30 AM</option>
+                                <option value="10:00">10:00 AM</option>
+                                <option value="10:30">10:30 AM</option>
+                                <option value="11:00">11:00 AM</option>
+                                <option value="11:30">11:30 AM</option>
+                            </optgroup>
+                            <optgroup label="Afternoon">
+                                <option value="12:00">12:00 PM</option>
+                                <option value="12:30">12:30 PM</option>
+                                <option value="13:00">01:00 PM</option>
+                                <option value="13:30">01:30 PM</option>
+                                <option value="14:00">02:00 PM</option>
+                                <option value="14:30">02:30 PM</option>
+                            </optgroup>
+                            <optgroup label="Evening">
+                                <option value="15:00">03:00 PM</option>
+                                <option value="15:30">03:30 PM</option>
+                                <option value="16:00">04:00 PM</option>
+                                <option value="16:30">04:30 PM</option>
+                                <option value="17:00">05:00 PM</option>
+                                <option value="17:30">05:30 PM</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    
+                    <!-- Duration -->
+                    <div>
+                        <label for="duration" class="block text-gray-700 font-medium mb-2">Duration *</label>
+                        <select id="duration" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <option value="15">15 minutes</option>
+                            <option value="30" selected>30 minutes</option>
+                            <option value="45">45 minutes</option>
+                            <option value="60">60 minutes</option>
+                            <option value="90">90 minutes</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Reason for Visit -->
+                    <div class="md:col-span-2">
+                        <label for="reason" class="block text-gray-700 font-medium mb-2">Reason for Visit</label>
+                        <textarea id="reason" rows="2" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Brief description of symptoms or reason for appointment"></textarea>
+                    </div>
+                    
+                    <!-- Notes -->
+                    <div class="md:col-span-2">
+                        <label for="notes" class="block text-gray-700 font-medium mb-2">Additional Notes</label>
+                        <textarea id="notes" rows="2" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Any additional information..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Form Buttons -->
+                <div class="flex justify-end space-x-4">
+                    <button type="button" class="close-modal px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition duration-300">
+                        Schedule Appointment
+                    </button>
+                </div>
+                
+                <!-- Hidden ID for editing -->
+                <input type="hidden" id="appointment-id" value="">
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Sample appointment data
+        let appointments = [
+            {
+                id: 1,
+                patientId: "patient-1",
+                patientName: "Rahul Kumar",
+                patientAge: 45,
+                patientGender: "Male",
+                patientPhone: "9876543210",
+                doctorId: "dr-sharma",
+                doctorName: "Dr. Rajesh Sharma",
+                doctorSpecialty: "Cardiologist",
+                date: "2023-10-15",
+                time: "10:00",
+                duration: 30,
+                type: "consultation",
+                reason: "Chest pain and shortness of breath",
+                status: "scheduled",
+                notes: "Follow-up from previous visit",
+                createdAt: "2023-10-10"
+            },
+            {
+                id: 2,
+                patientId: "patient-2",
+                patientName: "Priya Sharma",
+                patientAge: 32,
+                patientGender: "Female",
+                patientPhone: "9876543211",
+                doctorId: "dr-patel",
+                doctorName: "Dr. Priya Patel",
+                doctorSpecialty: "Neurologist",
+                date: "2023-10-15",
+                time: "11:30",
+                duration: 45,
+                type: "follow-up",
+                reason: "Migraine follow-up",
+                status: "confirmed",
+                notes: "Bring previous test reports",
+                createdAt: "2023-10-08"
+            },
+            {
+                id: 3,
+                patientId: "patient-3",
+                patientName: "Amit Patel",
+                patientAge: 28,
+                patientGender: "Male",
+                patientPhone: "9876543212",
+                doctorId: "dr-kumar",
+                doctorName: "Dr. Amit Kumar",
+                doctorSpecialty: "Orthopedic Surgeon",
+                date: "2023-10-15",
+                time: "14:00",
+                duration: 60,
+                type: "procedure",
+                reason: "Knee pain assessment",
+                status: "in-progress",
+                notes: "X-ray already done",
+                createdAt: "2023-10-05"
+            },
+            {
+                id: 4,
+                patientId: "patient-4",
+                patientName: "Sunita Gupta",
+                patientAge: 56,
+                patientGender: "Female",
+                patientPhone: "9876543213",
+                doctorId: "dr-gupta",
+                doctorName: "Dr. Sunita Gupta",
+                doctorSpecialty: "Pediatrician",
+                date: "2023-10-15",
+                time: "09:00",
+                duration: 30,
+                type: "checkup",
+                reason: "Annual health checkup",
+                status: "completed",
+                notes: "All tests completed",
+                createdAt: "2023-10-01"
+            },
+            {
+                id: 5,
+                patientId: "patient-5",
+                patientName: "Ramesh Singh",
+                patientAge: 62,
+                patientGender: "Male",
+                patientPhone: "9876543214",
+                doctorId: "dr-sharma",
+                doctorName: "Dr. Rajesh Sharma",
+                doctorSpecialty: "Cardiologist",
+                date: "2023-10-16",
+                time: "10:30",
+                duration: 30,
+                type: "consultation",
+                reason: "High blood pressure",
+                status: "scheduled",
+                notes: "New patient",
+                createdAt: "2023-10-12"
+            },
+            {
+                id: 6,
+                patientId: "patient-6",
+                patientName: "Anjali Mehta",
+                patientAge: 38,
+                patientGender: "Female",
+                patientPhone: "9876543215",
+                doctorId: "dr-mehta",
+                doctorName: "Dr. Anjali Mehta",
+                doctorSpecialty: "Ophthalmologist",
+                date: "2023-10-16",
+                time: "15:00",
+                duration: 45,
+                type: "test",
+                reason: "Eye examination",
+                status: "confirmed",
+                notes: "Bring glasses if any",
+                createdAt: "2023-10-11"
+            },
+            {
+                id: 7,
+                patientId: "patient-7",
+                patientName: "Vikram Reddy",
+                patientAge: 50,
+                patientGender: "Male",
+                patientPhone: "9876543216",
+                doctorId: "dr-patel",
+                doctorName: "Dr. Priya Patel",
+                doctorSpecialty: "Neurologist",
+                date: "2023-10-17",
+                time: "11:00",
+                duration: 60,
+                type: "consultation",
+                reason: "Memory issues",
+                status: "scheduled",
+                notes: "",
+                createdAt: "2023-10-13"
+            },
+            {
+                id: 8,
+                patientId: "patient-8",
+                patientName: "Neha Joshi",
+                patientAge: 29,
+                patientGender: "Female",
+                patientPhone: "9876543217",
+                doctorId: "dr-gupta",
+                doctorName: "Dr. Sunita Gupta",
+                doctorSpecialty: "Pediatrician",
+                date: "2023-10-17",
+                time: "16:30",
+                duration: 30,
+                type: "follow-up",
+                reason: "Child vaccination",
+                status: "cancelled",
+                notes: "Patient requested cancellation",
+                createdAt: "2023-10-09"
+            },
+            {
+                id: 9,
+                patientId: "patient-9",
+                patientName: "Sanjay Verma",
+                patientAge: 41,
+                patientGender: "Male",
+                patientPhone: "9876543218",
+                doctorId: "dr-kumar",
+                doctorName: "Dr. Amit Kumar",
+                doctorSpecialty: "Orthopedic Surgeon",
+                date: "2023-10-18",
+                time: "14:00",
+                duration: 45,
+                type: "consultation",
+                reason: "Back pain",
+                status: "no-show",
+                notes: "Patient didn't show up",
+                createdAt: "2023-10-07"
+            },
+            {
+                id: 10,
+                patientId: "patient-10",
+                patientName: "Kavita Singh",
+                patientAge: 35,
+                patientGender: "Female",
+                patientPhone: "9876543219",
+                doctorId: "dr-sharma",
+                doctorName: "Dr. Rajesh Sharma",
+                doctorSpecialty: "Cardiologist",
+                date: "2023-10-18",
+                time: "09:30",
+                duration: 30,
+                type: "checkup",
+                reason: "Routine cardiac checkup",
+                status: "scheduled",
+                notes: "",
+                createdAt: "2023-10-14"
+            }
+        ];
+
+        // Current date for calculations
+        const currentDate = new Date();
+        
+        // Initialize variables for pagination
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let filteredAppointments = [...appointments];
+        
+        // Calendar variables
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+        let selectedDay = null;
+        
+        // DOM Elements
+        const appointmentsTableBody = document.getElementById('appointments-table-body');
+        const searchInput = document.getElementById('search-appointment');
+        const clearSearchBtn = document.getElementById('clear-search');
+        const filterDate = document.getElementById('filter-date');
+        const filterDoctor = document.getElementById('filter-doctor');
+        const filterStatus = document.getElementById('filter-status');
+        const filterType = document.getElementById('filter-type');
+        const filterTime = document.getElementById('filter-time');
+        const sortBy = document.getElementById('sort-by');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const appointmentCount = document.getElementById('appointment-count');
+        const filteredCount = document.getElementById('filtered-count');
+        const noResultsDiv = document.getElementById('no-results');
+        const resetFiltersBtn = document.getElementById('reset-filters');
+        const itemsPerPageSelect = document.getElementById('items-per-page');
+        const prevPageBtn = document.getElementById('prev-page');
+        const nextPageBtn = document.getElementById('next-page');
+        const pageNumbersDiv = document.getElementById('page-numbers');
+        const pageStart = document.getElementById('page-start');
+        const pageEnd = document.getElementById('page-end');
+        const totalAppointments = document.getElementById('total-appointments');
+        const newAppointmentBtn = document.getElementById('new-appointment-btn');
+        const appointmentModal = document.getElementById('appointment-modal');
+        const closeModalBtns = document.querySelectorAll('.close-modal');
+        const appointmentForm = document.getElementById('appointment-form');
+        const modalTitle = document.getElementById('modal-title');
+        const currentDateDisplay = document.getElementById('current-date');
+        const lastUpdatedDisplay = document.getElementById('last-updated');
+        const viewListBtn = document.getElementById('view-list');
+        const viewCalendarBtn = document.getElementById('view-calendar');
+        const listView = document.getElementById('list-view');
+        const calendarView = document.getElementById('calendar-view');
+        const todaySchedule = document.getElementById('today-schedule');
+        const calendarDays = document.getElementById('calendar-days');
+        const currentMonthDisplay = document.getElementById('current-month');
+        const prevMonthBtn = document.getElementById('prev-month');
+        const nextMonthBtn = document.getElementById('next-month');
+        const todayBtn = document.getElementById('today-btn');
+        const selectedDayAppointments = document.getElementById('selected-day-appointments');
+        const selectedDayTitle = document.getElementById('selected-day-title');
+        const dayAppointmentsList = document.getElementById('day-appointments-list');
+        const addAppointmentDayBtn = document.getElementById('add-appointment-day');
+        
+        // Format date to display
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+        
+        // Format time to display
+        function formatTime(timeString) {
+            const [hours, minutes] = timeString.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour % 12 || 12;
+            return `${displayHour}:${minutes} ${ampm}`;
+        }
+        
+        // Get status badge class
+        function getStatusBadge(status) {
+            switch(status) {
+                case 'scheduled':
+                    return { class: 'bg-blue-100 text-blue-600', text: 'Scheduled' };
+                case 'confirmed':
+                    return { class: 'bg-green-100 text-green-600', text: 'Confirmed' };
+                case 'in-progress':
+                    return { class: 'bg-purple-100 text-purple-600', text: 'In Progress' };
+                case 'completed':
+                    return { class: 'bg-green-100 text-green-600', text: 'Completed' };
+                case 'cancelled':
+                    return { class: 'bg-red-100 text-red-600', text: 'Cancelled' };
+                case 'no-show':
+                    return { class: 'bg-yellow-100 text-yellow-600', text: 'No Show' };
+                default:
+                    return { class: 'bg-gray-100 text-gray-600', text: 'Unknown' };
+            }
+        }
+        
+        // Get appointment card class based on status
+        function getAppointmentCardClass(status) {
+            switch(status) {
+                case 'scheduled':
+                    return 'scheduled';
+                case 'confirmed':
+                    return 'scheduled';
+                case 'in-progress':
+                    return 'in-progress';
+                case 'completed':
+                    return 'completed';
+                case 'cancelled':
+                    return 'cancelled';
+                case 'no-show':
+                    return 'no-show';
+                default:
+                    return '';
+            }
+        }
+        
+        // Filter appointments based on search and filters
+        function filterAppointments() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const dateFilter = filterDate.value;
+            const doctorFilter = filterDoctor.value;
+            const statusFilter = filterStatus.value;
+            const typeFilter = filterType.value;
+            const timeFilter = filterTime.value;
+            
+            filteredAppointments = appointments.filter(appointment => {
+                // Search filter
+                const matchesSearch = searchTerm === '' || 
+                    appointment.patientName.toLowerCase().includes(searchTerm) ||
+                    appointment.patientPhone.includes(searchTerm) ||
+                    appointment.doctorName.toLowerCase().includes(searchTerm) ||
+                    appointment.id.toString().includes(searchTerm);
+                
+                // Date filter
+                let matchesDate = true;
+                if (dateFilter) {
+                    matchesDate = appointment.date === dateFilter;
+                }
+                
+                // Doctor filter
+                const matchesDoctor = doctorFilter === 'all' || appointment.doctorId === doctorFilter;
+                
+                // Status filter
+                const matchesStatus = statusFilter === 'all' || appointment.status === statusFilter;
+                
+                // Type filter
+                const matchesType = typeFilter === 'all' || appointment.type === typeFilter;
+                
+                // Time filter
+                let matchesTime = true;
+                if (timeFilter !== 'all') {
+                    const hour = parseInt(appointment.time.split(':')[0]);
+                    if (timeFilter === 'morning') {
+                        matchesTime = hour >= 8 && hour < 12;
+                    } else if (timeFilter === 'afternoon') {
+                        matchesTime = hour >= 12 && hour < 16;
+                    } else if (timeFilter === 'evening') {
+                        matchesTime = hour >= 16 && hour < 20;
+                    }
+                }
+                
+                return matchesSearch && matchesDate && matchesDoctor && matchesStatus && matchesType && matchesTime;
+            });
+            
+            // Update appointment count
+            updateAppointmentCount();
+            
+            // Reset to page 1 when filtering
+            currentPage = 1;
+            
+            // Sort appointments
+            sortAppointments();
+            
+            // Render table or calendar based on current view
+            if (listView.classList.contains('hidden')) {
+                renderCalendar();
+            } else {
+                renderAppointmentsTable();
+            }
+            
+            // Update pagination
+            updatePagination();
+            
+            // Update today's schedule
+            updateTodaySchedule();
+        }
+        
+        // Update appointment count display
+        function updateAppointmentCount() {
+            const totalAppointmentsCount = appointments.length;
+            const filteredCountValue = filteredAppointments.length;
+            
+            appointmentCount.textContent = filteredCountValue;
+            totalAppointments.textContent = filteredCountValue;
+            
+            if (filteredCountValue < totalAppointmentsCount) {
+                filteredCount.classList.remove('hidden');
+            } else {
+                filteredCount.classList.add('hidden');
+            }
+            
+            // Show/hide no results message
+            if (filteredCountValue === 0) {
+                noResultsDiv.classList.remove('hidden');
+            } else {
+                noResultsDiv.classList.add('hidden');
+            }
+        }
+        
+        // Sort appointments
+        function sortAppointments() {
+            const sortByValue = sortBy.value;
+            
+            filteredAppointments.sort((a, b) => {
+                switch(sortByValue) {
+                    case 'date-asc':
+                        return new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time);
+                    case 'date-desc':
+                        return new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time);
+                    case 'patient':
+                        return a.patientName.localeCompare(b.patientName);
+                    case 'doctor':
+                        return a.doctorName.localeCompare(b.doctorName);
+                    default:
+                        return 0;
+                }
+            });
+        }
+        
+        // Render appointments table
+        function renderAppointmentsTable() {
+            // Calculate start and end indices for pagination
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredAppointments.length);
+            const appointmentsToDisplay = filteredAppointments.slice(startIndex, endIndex);
+            
+            appointmentsTableBody.innerHTML = '';
+            
+            appointmentsToDisplay.forEach(appointment => {
+                const statusBadge = getStatusBadge(appointment.status);
+                const appointmentCardClass = getAppointmentCardClass(appointment.status);
+                const appointmentDate = new Date(appointment.date);
+                const today = new Date();
+                const isUpcoming = appointmentDate.toDateString() === today.toDateString() && appointment.status === 'scheduled';
+                
+                const row = document.createElement('tr');
+                row.className = `appointment-card border-b ${appointmentCardClass} ${isUpcoming ? 'upcoming' : ''}`;
+                row.innerHTML = `
+                    <td class="p-4">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 ${appointment.patientGender === 'Male' ? 'bg-blue-100' : 'bg-pink-100'} rounded-full flex items-center justify-center mr-4">
+                                <i class="fas ${appointment.patientGender === 'Male' ? 'fa-male' : 'fa-female'} ${appointment.patientGender === 'Male' ? 'text-blue-600' : 'text-pink-600'}"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-800">${appointment.patientName}</p>
+                                <p class="text-sm text-gray-500">${appointment.patientAge} years, ${appointment.patientGender} • ${appointment.patientPhone}</p>
+                                <div class="flex flex-wrap gap-1 mt-1">
+                                    <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">ID: APPT-${appointment.id.toString().padStart(3, '0')}</span>
+                                    <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">${appointment.type}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-user-md text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">${appointment.doctorName}</p>
+                                <p class="text-sm text-gray-500">${appointment.doctorSpecialty}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <div>
+                            <p class="font-medium text-gray-800">${formatDate(appointment.date)}</p>
+                            <p class="text-blue-600 font-medium">${formatTime(appointment.time)}</p>
+                            <p class="text-xs text-gray-500 mt-1">Duration: ${appointment.duration} minutes</p>
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <span class="status-badge ${statusBadge.class}">${statusBadge.text}</span>
+                        ${appointment.reason ? `<p class="text-xs text-gray-500 mt-2 truncate max-w-xs">${appointment.reason}</p>` : ''}
+                    </td>
+                    <td class="p-4">
+                        <div class="flex space-x-2">
+                            <button class="edit-appointment-btn text-blue-600 hover:text-blue-800 p-2" data-id="${appointment.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="view-appointment-btn text-green-600 hover:text-green-800 p-2" data-id="${appointment.id}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            ${appointment.status === 'scheduled' ? `
+                                <button class="confirm-appointment-btn text-green-600 hover:text-green-800 p-2" data-id="${appointment.id}">
+                                    <i class="fas fa-check-circle"></i>
+                                </button>
+                                <button class="cancel-appointment-btn text-red-600 hover:text-red-800 p-2" data-id="${appointment.id}">
+                                    <i class="fas fa-times-circle"></i>
+                                </button>
+                            ` : ''}
+                            ${appointment.status === 'confirmed' ? `
+                                <button class="start-appointment-btn text-purple-600 hover:text-purple-800 p-2" data-id="${appointment.id}">
+                                    <i class="fas fa-play-circle"></i>
+                                </button>
+                            ` : ''}
+                            ${appointment.status === 'in-progress' ? `
+                                <button class="complete-appointment-btn text-green-600 hover:text-green-800 p-2" data-id="${appointment.id}">
+                                    <i class="fas fa-check-circle"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                `;
+                
+                appointmentsTableBody.appendChild(row);
+            });
+            
+            // Add event listeners to action buttons
+            addEventListenersToAppointmentButtons();
+        }
+        
+        // Update pagination
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredAppointments.length / itemsPerPage);
+            
+            // Calculate page start and end
+            const startIndex = (currentPage - 1) * itemsPerPage + 1;
+            const endIndex = Math.min(startIndex + itemsPerPage - 1, filteredAppointments.length);
+            
+            pageStart.textContent = startIndex;
+            pageEnd.textContent = endIndex;
+            
+            // Clear previous page numbers
+            pageNumbersDiv.innerHTML = '';
+            
+            // Create page number buttons
+            const maxPagesToShow = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+            let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+            
+            if (endPage - startPage + 1 < maxPagesToShow) {
+                startPage = Math.max(1, endPage - maxPagesToShow + 1);
+            }
+            
+            // First page button
+            if (startPage > 1) {
+                const firstPageBtn = document.createElement('button');
+                firstPageBtn.className = 'w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200';
+                firstPageBtn.textContent = '1';
+                firstPageBtn.addEventListener('click', () => {
+                    currentPage = 1;
+                    renderAppointmentsTable();
+                    updatePagination();
+                });
+                pageNumbersDiv.appendChild(firstPageBtn);
+                
+                if (startPage > 2) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.className = 'w-10 h-10 flex items-center justify-center';
+                    ellipsis.textContent = '...';
+                    pageNumbersDiv.appendChild(ellipsis);
+                }
+            }
+            
+            // Page number buttons
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `w-10 h-10 flex items-center justify-center rounded-lg ${i === currentPage ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`;
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => {
+                    currentPage = i;
+                    renderAppointmentsTable();
+                    updatePagination();
+                });
+                pageNumbersDiv.appendChild(pageBtn);
+            }
+            
+            // Last page button
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.className = 'w-10 h-10 flex items-center justify-center';
+                    ellipsis.textContent = '...';
+                    pageNumbersDiv.appendChild(ellipsis);
+                }
+                
+                const lastPageBtn = document.createElement('button');
+                lastPageBtn.className = 'w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200';
+                lastPageBtn.textContent = totalPages;
+                lastPageBtn.addEventListener('click', () => {
+                    currentPage = totalPages;
+                    renderAppointmentsTable();
+                    updatePagination();
+                });
+                pageNumbersDiv.appendChild(lastPageBtn);
+            }
+            
+            // Enable/disable prev/next buttons
+            prevPageBtn.disabled = currentPage === 1;
+            prevPageBtn.classList.toggle('opacity-50', currentPage === 1);
+            prevPageBtn.classList.toggle('cursor-not-allowed', currentPage === 1);
+            
+            nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+            nextPageBtn.classList.toggle('opacity-50', currentPage === totalPages || totalPages === 0);
+            nextPageBtn.classList.toggle('cursor-not-allowed', currentPage === totalPages || totalPages === 0);
+        }
+        
+        // Update today's schedule
+        function updateTodaySchedule() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayAppointments = appointments.filter(app => app.date === today && (app.status === 'scheduled' || app.status === 'confirmed'));
+            
+            todaySchedule.innerHTML = '';
+            
+            if (todayAppointments.length === 0) {
+                todaySchedule.innerHTML = `
+                    <div class="text-center py-4">
+                        <p class="text-gray-500">No appointments scheduled for today</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort by time
+            todayAppointments.sort((a, b) => a.time.localeCompare(b.time));
+            
+            // Show only first 3 appointments
+            const appointmentsToShow = todayAppointments.slice(0, 3);
+            
+            appointmentsToShow.forEach(appointment => {
+                const statusBadge = getStatusBadge(appointment.status);
+                
+                const appointmentDiv = document.createElement('div');
+                appointmentDiv.className = 'flex items-center justify-between p-3 bg-blue-50 rounded-lg';
+                appointmentDiv.innerHTML = `
+                    <div>
+                        <p class="font-medium">${appointment.patientName}</p>
+                        <div class="flex items-center mt-1">
+                            <span class="status-badge ${statusBadge.class} mr-2">${statusBadge.text}</span>
+                            <span class="text-sm text-gray-500">${formatTime(appointment.time)}</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-medium">${appointment.doctorName.split(' ')[1]}</p>
+                        <p class="text-xs text-gray-500">${appointment.type}</p>
+                    </div>
+                `;
+                todaySchedule.appendChild(appointmentDiv);
+            });
+            
+            if (todayAppointments.length > 3) {
+                const moreDiv = document.createElement('div');
+                moreDiv.className = 'text-center pt-2';
+                moreDiv.innerHTML = `<p class="text-sm text-blue-600">+ ${todayAppointments.length - 3} more appointments today</p>`;
+                todaySchedule.appendChild(moreDiv);
+            }
+        }
+        
+        // Render calendar
+        function renderCalendar() {
+            // Update month display
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            currentMonthDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            
+            // Get first day of month and total days
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDay = firstDay.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            
+            // Clear calendar
+            calendarDays.innerHTML = '';
+            
+            // Add empty cells for days before the first day of the month
+            for (let i = 0; i < startingDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day p-3 text-center text-gray-400';
+                calendarDays.appendChild(emptyDay);
+            }
+            
+            // Get today's date
+            const today = new Date();
+            const isToday = (day) => {
+                return day === today.getDate() && 
+                       currentMonth === today.getMonth() && 
+                       currentYear === today.getFullYear();
+            };
+            
+            // Add days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day p-3 text-center cursor-pointer';
+                
+                // Check if this day is today
+                if (isToday(day)) {
+                    dayElement.classList.add('today');
+                }
+                
+                // Check if this day has appointments
+                const dateStr = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                const dayAppointments = appointments.filter(app => app.date === dateStr);
+                
+                if (dayAppointments.length > 0) {
+                    dayElement.classList.add('has-appointments');
+                    
+                    // Add appointment indicators
+                    const scheduledCount = dayAppointments.filter(app => app.status === 'scheduled' || app.status === 'confirmed').length;
+                    const completedCount = dayAppointments.filter(app => app.status === 'completed').length;
+                    const cancelledCount = dayAppointments.filter(app => app.status === 'cancelled' || app.status === 'no-show').length;
+                    
+                    const indicatorsDiv = document.createElement('div');
+                    indicatorsDiv.className = 'flex justify-center space-x-1 mt-1';
+                    
+                    if (scheduledCount > 0) {
+                        const indicator = document.createElement('div');
+                        indicator.className = 'day-appointment-indicator scheduled';
+                        indicator.title = `${scheduledCount} scheduled`;
+                        indicatorsDiv.appendChild(indicator);
+                    }
+                    
+                    if (completedCount > 0) {
+                        const indicator = document.createElement('div');
+                        indicator.className = 'day-appointment-indicator completed';
+                        indicator.title = `${completedCount} completed`;
+                        indicatorsDiv.appendChild(indicator);
+                    }
+                    
+                    if (cancelledCount > 0) {
+                        const indicator = document.createElement('div');
+                        indicator.className = 'day-appointment-indicator cancelled';
+                        indicator.title = `${cancelledCount} cancelled/no-show`;
+                        indicatorsDiv.appendChild(indicator);
+                    }
+                    
+                    dayElement.appendChild(indicatorsDiv);
+                }
+                
+                // Add day number
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'font-medium';
+                dayNumber.textContent = day;
+                dayElement.prepend(dayNumber);
+                
+                // Check if this day is selected
+                if (selectedDay && selectedDay.getDate() === day && 
+                    selectedDay.getMonth() === currentMonth && 
+                    selectedDay.getFullYear() === currentYear) {
+                    dayElement.classList.add('selected');
+                }
+                
+                // Add click event
+                dayElement.addEventListener('click', () => {
+                    // Remove selected class from all days
+                    document.querySelectorAll('.calendar-day').forEach(dayEl => {
+                        dayEl.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to clicked day
+                    dayElement.classList.add('selected');
+                    
+                    // Set selected day
+                    selectedDay = new Date(currentYear, currentMonth, day);
+                    
+                    // Show appointments for selected day
+                    showDayAppointments(selectedDay);
+                });
+                
+                calendarDays.appendChild(dayElement);
+            }
+        }
+        
+        // Show appointments for selected day
+        function showDayAppointments(date) {
+            const dateStr = date.toISOString().split('T')[0];
+            const dayAppointments = appointments.filter(app => app.date === dateStr);
+            
+            // Update title
+            selectedDayTitle.textContent = `Appointments for ${formatDate(dateStr)}`;
+            
+            // Clear previous appointments
+            dayAppointmentsList.innerHTML = '';
+            
+            if (dayAppointments.length === 0) {
+                dayAppointmentsList.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-calendar-times text-gray-400"></i>
+                        </div>
+                        <h4 class="text-lg font-medium text-gray-700 mb-2">No appointments scheduled</h4>
+                        <p class="text-gray-500">No appointments are scheduled for this day.</p>
+                    </div>
+                `;
+            } else {
+                // Sort by time
+                dayAppointments.sort((a, b) => a.time.localeCompare(b.time));
+                
+                dayAppointments.forEach(appointment => {
+                    const statusBadge = getStatusBadge(appointment.status);
+                    
+                    const appointmentDiv = document.createElement('div');
+                    appointmentDiv.className = 'flex items-center justify-between p-4 border-b';
+                    appointmentDiv.innerHTML = `
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 ${appointment.patientGender === 'Male' ? 'bg-blue-100' : 'bg-pink-100'} rounded-full flex items-center justify-center mr-4">
+                                <i class="fas ${appointment.patientGender === 'Male' ? 'fa-male' : 'fa-female'} ${appointment.patientGender === 'Male' ? 'text-blue-600' : 'text-pink-600'}"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-800">${appointment.patientName}</p>
+                                <p class="text-sm text-gray-500">${formatTime(appointment.time)} • ${appointment.duration} mins</p>
+                                <span class="status-badge ${statusBadge.class} mt-1">${statusBadge.text}</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-medium">${appointment.doctorName.split(' ')[1]}</p>
+                            <p class="text-sm text-gray-500">${appointment.type}</p>
+                        </div>
+                    `;
+                    dayAppointmentsList.appendChild(appointmentDiv);
+                });
+            }
+            
+            // Show the selected day appointments section
+            selectedDayAppointments.classList.remove('hidden');
+        }
+        
+        // Add event listeners to appointment buttons
+        function addEventListenersToAppointmentButtons() {
+            // Edit appointment buttons
+            document.querySelectorAll('.edit-appointment-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const appointmentId = parseInt(this.getAttribute('data-id'));
+                    const appointment = appointments.find(a => a.id === appointmentId);
+                    
+                    if (appointment) {
+                        openAppointmentModal(appointment);
+                    }
+                });
+            });
+            
+            // View appointment buttons
+            document.querySelectorAll('.view-appointment-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const appointmentId = parseInt(this.getAttribute('data-id'));
+                    const appointment = appointments.find(a => a.id === appointmentId);
+                    
+                    if (appointment) {
+                        alert(`Viewing appointment details for ${appointment.patientName} with ${appointment.doctorName} on ${formatDate(appointment.date)} at ${formatTime(appointment.time)}.\n\nReason: ${appointment.reason || 'Not specified'}\nStatus: ${appointment.status}\nNotes: ${appointment.notes || 'None'}`);
+                    }
+                });
+            });
+            
+            // Confirm appointment buttons
+            document.querySelectorAll('.confirm-appointment-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const appointmentId = parseInt(this.getAttribute('data-id'));
+                    const appointment = appointments.find(a => a.id === appointmentId);
+                    
+                    if (appointment) {
+                        if (confirm(`Confirm appointment for ${appointment.patientName} with ${appointment.doctorName} on ${formatDate(appointment.date)} at ${formatTime(appointment.time)}?`)) {
+                            appointment.status = 'confirmed';
+                            filterAppointments();
+                            alert(`Appointment confirmed for ${appointment.patientName}.`);
+                        }
+                    }
+                });
+            });
+            
+            // Cancel appointment buttons
+            document.querySelectorAll('.cancel-appointment-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const appointmentId = parseInt(this.getAttribute('data-id'));
+                    const appointment = appointments.find(a => a.id === appointmentId);
+                    
+                    if (appointment) {
+                        const reason = prompt(`Cancel appointment for ${appointment.patientName} with ${appointment.doctorName} on ${formatDate(appointment.date)} at ${formatTime(appointment.time)}?\n\nPlease enter reason for cancellation:`, "Patient requested");
+                        
+                        if (reason !== null) {
+                            appointment.status = 'cancelled';
+                            appointment.notes = appointment.notes ? `${appointment.notes}. Cancelled: ${reason}` : `Cancelled: ${reason}`;
+                            filterAppointments();
+                            alert(`Appointment cancelled for ${appointment.patientName}.`);
+                        }
+                    }
+                });
+            });
+            
+            // Start appointment buttons
+            document.querySelectorAll('.start-appointment-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const appointmentId = parseInt(this.getAttribute('data-id'));
+                    const appointment = appointments.find(a => a.id === appointmentId);
+                    
+                    if (appointment) {
+                        if (confirm(`Start appointment for ${appointment.patientName} with ${appointment.doctorName}?`)) {
+                            appointment.status = 'in-progress';
+                            filterAppointments();
+                            alert(`Appointment started for ${appointment.patientName}.`);
+                        }
+                    }
+                });
+            });
+            
+            // Complete appointment buttons
+            document.querySelectorAll('.complete-appointment-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const appointmentId = parseInt(this.getAttribute('data-id'));
+                    const appointment = appointments.find(a => a.id === appointmentId);
+                    
+                    if (appointment) {
+                        const notes = prompt(`Complete appointment for ${appointment.patientName} with ${appointment.doctorName}?\n\nEnter any additional notes:`, appointment.notes || "");
+                        
+                        if (notes !== null) {
+                            appointment.status = 'completed';
+                            appointment.notes = notes;
+                            filterAppointments();
+                            alert(`Appointment completed for ${appointment.patientName}.`);
+                        }
+                    }
+                });
+            });
+        }
+        
+        // Open appointment modal for editing or adding
+        function openAppointmentModal(appointment = null) {
+            if (appointment) {
+                // Editing existing appointment
+                modalTitle.textContent = 'Edit Appointment';
+                document.getElementById('appointment-id').value = appointment.id;
+                document.getElementById('patient-select').value = appointment.patientId;
+                document.getElementById('doctor-select').value = appointment.doctorId;
+                document.getElementById('appointment-type').value = appointment.type;
+                document.getElementById('appointment-date').value = appointment.date;
+                document.getElementById('appointment-time').value = appointment.time;
+                document.getElementById('duration').value = appointment.duration;
+                document.getElementById('reason').value = appointment.reason;
+                document.getElementById('notes').value = appointment.notes;
+            } else {
+                // Adding new appointment
+                modalTitle.textContent = 'Schedule New Appointment';
+                appointmentForm.reset();
+                document.getElementById('appointment-id').value = '';
+                document.getElementById('appointment-date').value = '';
+                document.getElementById('appointment-time').value = '';
+            }
+            
+            appointmentModal.style.display = 'block';
+        }
+        
+        // Close appointment modal
+        function closeAppointmentModal() {
+            appointmentModal.style.display = 'none';
+            appointmentForm.reset();
+        }
+        
+        // Initialize date pickers
+        flatpickr("#filter-date", {
+            dateFormat: "Y-m-d",
+            defaultDate: null
+        });
+        
+        flatpickr("#appointment-date", {
+            minDate: "today",
+            dateFormat: "Y-m-d",
+            defaultDate: "today"
+        });
+        
+        // Initialize current date display
+        function updateCurrentDate() {
+            const now = new Date();
+            currentDateDisplay.textContent = now.toLocaleDateString('en-IN', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+        
+        // Event Listeners
+        searchInput.addEventListener('input', filterAppointments);
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            filterAppointments();
+        });
+        
+        filterDate.addEventListener('change', filterAppointments);
+        filterDoctor.addEventListener('change', filterAppointments);
+        filterStatus.addEventListener('change', filterAppointments);
+        filterType.addEventListener('change', filterAppointments);
+        filterTime.addEventListener('change', filterAppointments);
+        sortBy.addEventListener('change', () => {
+            sortAppointments();
+            renderAppointmentsTable();
+        });
+        
+        filterBtns.forEach(button => {
+            button.addEventListener('click', function() {
+                const filter = this.getAttribute('data-filter');
+                
+                // Remove active class from all filter buttons
+                filterBtns.forEach(btn => {
+                    btn.classList.remove('filter-active');
+                });
+                
+                // Add active class to clicked button
+                this.classList.add('filter-active');
+                
+                // Apply filter
+                switch(filter) {
+                    case 'today':
+                        const today = new Date().toISOString().split('T')[0];
+                        filterDate.value = today;
+                        break;
+                    case 'tomorrow':
+                        const tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        filterDate.value = tomorrow.toISOString().split('T')[0];
+                        break;
+                    case 'upcoming':
+                        filterStatus.value = 'scheduled';
+                        break;
+                    case 'cancelled':
+                        filterStatus.value = 'cancelled';
+                        break;
+                    case 'no-show':
+                        filterStatus.value = 'no-show';
+                        break;
+                }
+                
+                filterAppointments();
+                
+                // Remove active class after 2 seconds
+                setTimeout(() => {
+                    this.classList.remove('filter-active');
+                }, 2000);
+            });
+        });
+        
+        resetFiltersBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            filterDate.value = '';
+            filterDoctor.value = 'all';
+            filterStatus.value = 'all';
+            filterType.value = 'all';
+            filterTime.value = 'all';
+            sortBy.value = 'date-asc';
+            itemsPerPageSelect.value = '10';
+            itemsPerPage = 10;
+            currentPage = 1;
+            
+            filterAppointments();
+        });
+        
+        itemsPerPageSelect.addEventListener('change', () => {
+            itemsPerPage = parseInt(itemsPerPageSelect.value);
+            currentPage = 1;
+            filterAppointments();
+        });
+        
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderAppointmentsTable();
+                updatePagination();
+            }
+        });
+        
+        nextPageBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredAppointments.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderAppointmentsTable();
+                updatePagination();
+            }
+        });
+        
+        newAppointmentBtn.addEventListener('click', () => openAppointmentModal());
+        
+        closeModalBtns.forEach(btn => {
+            btn.addEventListener('click', closeAppointmentModal);
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', (event) => {
+            if (event.target === appointmentModal) {
+                closeAppointmentModal();
+            }
+        });
+        
+        // Handle form submission
+        appointmentForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            
+            const appointmentId = document.getElementById('appointment-id').value;
+            const isEditing = appointmentId !== '';
+            
+            // Get form values
+            const patientSelect = document.getElementById('patient-select');
+            const selectedPatient = patientSelect.options[patientSelect.selectedIndex];
+            const patientText = selectedPatient.text;
+            
+            // Parse patient information from the selected option
+            const patientMatch = patientText.match(/(.+?) \(([MF]), (\d+)\) - Phone: (\d+)/);
+            
+            const appointmentData = {
+                id: isEditing ? parseInt(appointmentId) : appointments.length > 0 ? Math.max(...appointments.map(a => a.id)) + 1 : 1,
+                patientId: document.getElementById('patient-select').value,
+                patientName: patientMatch ? patientMatch[1] : 'New Patient',
+                patientAge: patientMatch ? parseInt(patientMatch[3]) : 30,
+                patientGender: patientMatch ? patientMatch[2] : 'Male',
+                patientPhone: patientMatch ? patientMatch[4] : '0000000000',
+                doctorId: document.getElementById('doctor-select').value,
+                doctorName: document.getElementById('doctor-select').options[document.getElementById('doctor-select').selectedIndex].text.split(' - ')[0],
+                doctorSpecialty: document.getElementById('doctor-select').options[document.getElementById('doctor-select').selectedIndex].text.split(' - ')[1] || 'General',
+                date: document.getElementById('appointment-date').value,
+                time: document.getElementById('appointment-time').value,
+                duration: parseInt(document.getElementById('duration').value),
+                type: document.getElementById('appointment-type').value,
+                reason: document.getElementById('reason').value,
+                status: 'scheduled',
+                notes: document.getElementById('notes').value,
+                createdAt: isEditing ? appointments.find(a => a.id === parseInt(appointmentId)).createdAt : new Date().toISOString().split('T')[0]
+            };
+            
+            if (isEditing) {
+                // Update existing appointment
+                const index = appointments.findIndex(a => a.id === parseInt(appointmentId));
+                if (index !== -1) {
+                    appointments[index] = appointmentData;
+                    alert('Appointment updated successfully!');
+                }
+            } else {
+                // Add new appointment
+                appointments.push(appointmentData);
+                alert('Appointment scheduled successfully!');
+            }
+            
+            // Close modal and refresh
+            closeAppointmentModal();
+            filterAppointments();
+        });
+        
+        // View toggle
+        viewListBtn.addEventListener('click', () => {
+            viewListBtn.classList.remove('bg-gray-100', 'text-gray-700');
+            viewListBtn.classList.add('bg-blue-600', 'text-white');
+            viewCalendarBtn.classList.remove('bg-blue-600', 'text-white');
+            viewCalendarBtn.classList.add('bg-gray-100', 'text-gray-700');
+            
+            listView.classList.remove('hidden');
+            calendarView.classList.add('hidden');
+            selectedDayAppointments.classList.add('hidden');
+        });
+        
+        viewCalendarBtn.addEventListener('click', () => {
+            viewCalendarBtn.classList.remove('bg-gray-100', 'text-gray-700');
+            viewCalendarBtn.classList.add('bg-blue-600', 'text-white');
+            viewListBtn.classList.remove('bg-blue-600', 'text-white');
+            viewListBtn.classList.add('bg-gray-100', 'text-gray-700');
+            
+            listView.classList.add('hidden');
+            calendarView.classList.remove('hidden');
+            
+            // Render calendar
+            renderCalendar();
+        });
+        
+        // Calendar navigation
+        prevMonthBtn.addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        });
+        
+        nextMonthBtn.addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        });
+        
+        todayBtn.addEventListener('click', () => {
+            const today = new Date();
+            currentMonth = today.getMonth();
+            currentYear = today.getFullYear();
+            selectedDay = today;
+            renderCalendar();
+            showDayAppointments(today);
+        });
+        
+        addAppointmentDayBtn.addEventListener('click', () => {
+            if (selectedDay) {
+                openAppointmentModal();
+                // Set the date in the form to the selected day
+                const dateStr = selectedDay.toISOString().split('T')[0];
+                document.getElementById('appointment-date').value = dateStr;
+            } else {
+                alert('Please select a day from the calendar first.');
+            }
+        });
+        
+        // New patient button
+        document.getElementById('new-patient-btn').addEventListener('click', () => {
+            alert('This would open a new patient registration form. In a real application, this would allow you to register a new patient and then select them for the appointment.');
+        });
+        
+        // Initialize
+        updateCurrentDate();
+        filterAppointments();
+        
+        // Update last updated time
+        function updateLastUpdated() {
+            const now = new Date();
+            lastUpdatedDisplay.textContent = now.toLocaleTimeString('en-IN', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        updateLastUpdated();
+        setInterval(updateLastUpdated, 60000); // Update every minute
+    </script>
+</body>
+</html>

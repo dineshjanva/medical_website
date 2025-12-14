@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shyam Medical - Medicine Stock Management</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Flatpickr for date selection -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #1e40af;
+            --secondary-blue: #3b82f6;
+            --light-blue: #dbeafe;
+            --trust-blue: #2563eb;
+            --dark-blue: #1e3a8a;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f3f4f6;
+        }
+        
+        h1, h2, h3, h4, h5 {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        
+        .stock-card {
+            transition: all 0.3s ease;
+        }
+        
+        .stock-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+        
+        .expired {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-left: 4px solid #ef4444;
+        }
+        
+        .expiring-soon {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .good {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-left: 4px solid #10b981;
+        }
+        
+        .low-stock {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        
+        .medicine-card {
+            transition: all 0.2s ease;
+        }
+        
+        .medicine-card:hover {
+            background-color: #f8fafc;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 700px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .close-modal {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close-modal:hover {
+            color: #000;
+        }
+        
+        .filter-active {
+            background-color: #3b82f6 !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <!-- Dashboard Container -->
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar bg-blue-900 text-white w-64 flex-shrink-0 overflow-y-auto">
+            <!-- Logo -->
+            <div class="p-6 border-b border-blue-800">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white text-blue-900 p-2 rounded-lg">
+                        <i class="fas fa-heartbeat text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Shyam Medical</h1>
+                        <p class="text-xs text-blue-200">Admin Dashboard</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="Dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-800">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="medicine.html" class="flex items-center space-x-3 p-3 rounded-lg bg-blue-800">
+                            <i class="fas fa-capsules"></i>
+                            <span>Medicine Stock</span>
+                        </a>
+                    </li>
+                    <!-- <li>
+                        <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-800">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li> -->
+                    <!-- <li>
+                        <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-800">
+                            <i class="fas fa-users"></i>
+                            <span>Patients</span>
+                        </a>
+                    </li> -->
+                    <li>
+                        <a href="appointments.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-800">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Appointments</span>
+                        </a>
+                    </li>
+                    <!-- <li>
+                        <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-800">
+                            <i class="fas fa-user-md"></i>
+                            <span>Doctors</span>
+                        </a>
+                    </li> -->
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-800">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Logout -->
+                <div class="mt-8 p-4 border-t border-blue-800">
+                    <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-800">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm border-b">
+                <div class="flex justify-between items-center p-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-blue-900">Medicine Stock Management</h2>
+                        <p class="text-gray-600">Track and manage all medicines in inventory</p>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <!-- Date Display -->
+                        <div class="hidden md:block bg-blue-50 px-4 py-2 rounded-lg">
+                            <p class="text-sm text-gray-600">Today</p>
+                            <p class="font-medium" id="current-date">Loading...</p>
+                        </div>
+                        
+                        <!-- User Profile -->
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user-md text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">Pharmacy Admin</p>
+                                <p class="text-sm text-gray-600">Stock Manager</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Main Content -->
+            <main class="p-6">
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Total Medicines -->
+                    <div class="stock-card bg-white rounded-xl p-6 shadow-md">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-500 text-sm">Total Medicines</p>
+                                <p class="text-3xl font-bold text-blue-900 mt-2">142</p>
+                                <p class="text-blue-500 text-sm mt-1">
+                                    <i class="fas fa-capsules mr-1"></i> 12 categories
+                                </p>
+                            </div>
+                            <div class="bg-blue-100 p-3 rounded-lg">
+                                <i class="fas fa-pills text-blue-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Low Stock -->
+                    <div class="stock-card bg-white rounded-xl p-6 shadow-md">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-500 text-sm">Low Stock</p>
+                                <p class="text-3xl font-bold text-red-600 mt-2">8</p>
+                                <p class="text-red-500 text-sm mt-1">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i> Need reorder
+                                </p>
+                            </div>
+                            <div class="bg-red-100 p-3 rounded-lg">
+                                <i class="fas fa-exclamation-circle text-red-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Expiring Soon -->
+                    <div class="stock-card bg-white rounded-xl p-6 shadow-md">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-500 text-sm">Expiring Soon</p>
+                                <p class="text-3xl font-bold text-yellow-600 mt-2">5</p>
+                                <p class="text-yellow-500 text-sm mt-1">
+                                    <i class="fas fa-clock mr-1"></i> Within 30 days
+                                </p>
+                            </div>
+                            <div class="bg-yellow-100 p-3 rounded-lg">
+                                <i class="fas fa-hourglass-half text-yellow-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Expired -->
+                    <div class="stock-card bg-white rounded-xl p-6 shadow-md">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-500 text-sm">Expired</p>
+                                <p class="text-3xl font-bold text-gray-600 mt-2">2</p>
+                                <p class="text-gray-500 text-sm mt-1">
+                                    <i class="fas fa-ban mr-1"></i> Needs disposal
+                                </p>
+                            </div>
+                            <div class="bg-gray-100 p-3 rounded-lg">
+                                <i class="fas fa-skull-crossbones text-gray-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Search and Filter Section -->
+                <div class="bg-white rounded-xl p-6 shadow-md mb-8">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-blue-900 mb-4 lg:mb-0">Search & Filter Medicines</h3>
+                        <button id="add-medicine-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+                            <i class="fas fa-plus-circle mr-2"></i>Add New Medicine
+                        </button>
+                    </div>
+                    
+                    <!-- Search Input -->
+                    <div class="mb-6">
+                        <div class="relative">
+                            <input type="text" id="search-medicine" placeholder="Search by medicine name, batch number, or manufacturer..." class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <i class="fas fa-search absolute left-4 top-3.5 text-gray-400"></i>
+                            <button id="clear-search" class="absolute right-4 top-3.5 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Options -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <!-- Filter by Type -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Medicine Type</label>
+                            <select id="filter-type" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="all">All Types</option>
+                                <option value="tablet">Tablet</option>
+                                <option value="capsule">Capsule</option>
+                                <option value="syrup">Syrup</option>
+                                <option value="injection">Injection</option>
+                                <option value="ointment">Ointment</option>
+                                <option value="drops">Drops</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Filter by Status -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Stock Status</label>
+                            <select id="filter-status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="all">All Status</option>
+                                <option value="in-stock">In Stock</option>
+                                <option value="low-stock">Low Stock</option>
+                                <option value="out-of-stock">Out of Stock</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Filter by Expiry -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Status</label>
+                            <select id="filter-expiry" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="all">All Expiry</option>
+                                <option value="expired">Expired</option>
+                                <option value="expiring-soon">Expiring Soon (≤30 days)</option>
+                                <option value="good">Not Expiring Soon</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Filter by Category -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                            <select id="filter-category" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="all">All Categories</option>
+                                <option value="analgesic">Analgesic</option>
+                                <option value="antibiotic">Antibiotic</option>
+                                <option value="antihistamine">Antihistamine</option>
+                                <option value="cardiovascular">Cardiovascular</option>
+                                <option value="gastrointestinal">Gastrointestinal</option>
+                                <option value="diabetes">Diabetes</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Filter Buttons -->
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        <button class="filter-btn px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200" data-filter="low-stock">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>Low Stock
+                        </button>
+                        <button class="filter-btn px-4 py-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200" data-filter="expiring-soon">
+                            <i class="fas fa-clock mr-1"></i>Expiring Soon
+                        </button>
+                        <button class="filter-btn px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200" data-filter="expired">
+                            <i class="fas fa-skull-crossbones mr-1"></i>Expired
+                        </button>
+                        <button class="filter-btn px-4 py-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200" data-filter="need-reorder">
+                            <i class="fas fa-shopping-cart mr-1"></i>Need Reorder
+                        </button>
+                    </div>
+                    
+                    <!-- Active Filters Display -->
+                    <div id="active-filters" class="mt-4 flex flex-wrap gap-2 hidden">
+                        <span class="text-sm text-gray-600">Active filters:</span>
+                    </div>
+                </div>
+                
+                <!-- Medicine Stock Table -->
+                <div class="bg-white rounded-xl p-6 shadow-md mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-blue-900">Medicine Inventory</h3>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-gray-600 text-sm">Sort by:</span>
+                            <select id="sort-by" class="px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="name">Name (A-Z)</option>
+                                <option value="expiry">Expiry Date (Soonest)</option>
+                                <option value="stock">Stock (Low to High)</option>
+                                <option value="category">Category</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Medicine Count -->
+                    <div class="mb-4">
+                        <p class="text-gray-600">
+                            Showing <span id="medicine-count" class="font-bold">142</span> medicines
+                            <span id="filtered-count" class="hidden"> (filtered from 142)</span>
+                        </p>
+                    </div>
+                    
+                    <!-- Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-blue-50">
+                                    <th class="text-left p-4 font-medium text-blue-900">Medicine Details</th>
+                                    <th class="text-left p-4 font-medium text-blue-900">Stock</th>
+                                    <th class="text-left p-4 font-medium text-blue-900">Expiry Date</th>
+                                    <th class="text-left p-4 font-medium text-blue-900">Status</th>
+                                    <th class="text-left p-4 font-medium text-blue-900">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="medicine-table-body">
+                                <!-- Medicine rows will be dynamically added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div id="no-results" class="hidden text-center py-12">
+                        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-search text-gray-400 text-3xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-700 mb-2">No medicines found</h4>
+                        <p class="text-gray-500 max-w-md mx-auto mb-6">Try adjusting your search or filter to find what you're looking for.</p>
+                        <button id="reset-filters" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300">
+                            Reset All Filters
+                        </button>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="flex justify-between items-center mt-6">
+                        <div>
+                            <p class="text-gray-600 text-sm">Items per page:</p>
+                            <select id="items-per-page" class="px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <button id="prev-page" class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div id="page-numbers" class="flex space-x-1">
+                                <!-- Page numbers will be dynamically added here -->
+                            </div>
+                            <button id="next-page" class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Expiry Alerts Section -->
+                <div class="bg-white rounded-xl p-6 shadow-md">
+                    <h3 class="text-xl font-bold text-blue-900 mb-6">Expiry Alerts</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Expired Medicines -->
+                        <div class="expired p-5 rounded-lg">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h4 class="font-bold text-gray-800">Expired Medicines</h4>
+                                    <p class="text-sm text-gray-600">Immediate action required</p>
+                                </div>
+                                <div class="bg-white p-2 rounded-full">
+                                    <i class="fas fa-skull-crossbones text-red-600"></i>
+                                </div>
+                            </div>
+                            <ul id="expired-list" class="space-y-2">
+                                <!-- Expired items will be dynamically added here -->
+                            </ul>
+                        </div>
+                        
+                        <!-- Expiring Soon -->
+                        <div class="expiring-soon p-5 rounded-lg">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h4 class="font-bold text-gray-800">Expiring Soon</h4>
+                                    <p class="text-sm text-gray-600">Within next 30 days</p>
+                                </div>
+                                <div class="bg-white p-2 rounded-full">
+                                    <i class="fas fa-clock text-yellow-600"></i>
+                                </div>
+                            </div>
+                            <ul id="expiring-soon-list" class="space-y-2">
+                                <!-- Expiring soon items will be dynamically added here -->
+                            </ul>
+                        </div>
+                        
+                        <!-- Low Stock -->
+                        <div class="good p-5 rounded-lg">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h4 class="font-bold text-gray-800">Low Stock Medicines</h4>
+                                    <p class="text-sm text-gray-600">Need reordering</p>
+                                </div>
+                                <div class="bg-white p-2 rounded-full">
+                                    <i class="fas fa-exclamation-circle text-green-600"></i>
+                                </div>
+                            </div>
+                            <ul id="low-stock-list" class="space-y-2">
+                                <!-- Low stock items will be dynamically added here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            
+            <!-- Footer -->
+            <footer class="bg-white border-t p-4">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-600 text-sm">© 2023 Shyam Medical - Medicine Stock Management System</p>
+                    <p class="text-gray-600 text-sm">Last updated: <span id="last-updated">Just now</span></p>
+                </div>
+            </footer>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Medicine Modal -->
+    <div id="medicine-modal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h3 class="text-2xl font-bold text-blue-900" id="modal-title">Add New Medicine</h3>
+                <span class="close-modal text-2xl">&times;</span>
+            </div>
+            
+            <form id="medicine-form" class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Medicine Name -->
+                    <div>
+                        <label for="medicine-name" class="block text-gray-700 font-medium mb-2">Medicine Name *</label>
+                        <input type="text" id="medicine-name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Paracetamol 500mg" required>
+                    </div>
+                    
+                    <!-- Generic Name -->
+                    <div>
+                        <label for="generic-name" class="block text-gray-700 font-medium mb-2">Generic Name</label>
+                        <input type="text" id="generic-name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Acetaminophen">
+                    </div>
+                    
+                    <!-- Medicine Type -->
+                    <div>
+                        <label for="medicine-type" class="block text-gray-700 font-medium mb-2">Medicine Type *</label>
+                        <select id="medicine-type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <option value="">Select Type</option>
+                            <option value="tablet">Tablet</option>
+                            <option value="capsule">Capsule</option>
+                            <option value="syrup">Syrup</option>
+                            <option value="injection">Injection</option>
+                            <option value="ointment">Ointment/Cream</option>
+                            <option value="drops">Drops</option>
+                            <option value="inhaler">Inhaler</option>
+                            <option value="suppository">Suppository</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Category -->
+                    <div>
+                        <label for="category" class="block text-gray-700 font-medium mb-2">Category *</label>
+                        <select id="category" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <option value="">Select Category</option>
+                            <option value="analgesic">Analgesic (Pain Relief)</option>
+                            <option value="antibiotic">Antibiotic</option>
+                            <option value="antihistamine">Antihistamine</option>
+                            <option value="cardiovascular">Cardiovascular</option>
+                            <option value="gastrointestinal">Gastrointestinal</option>
+                            <option value="diabetes">Diabetes</option>
+                            <option value="respiratory">Respiratory</option>
+                            <option value="psychiatric">Psychiatric</option>
+                            <option value="vitamin">Vitamin/Supplement</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Manufacturer -->
+                    <div>
+                        <label for="manufacturer" class="block text-gray-700 font-medium mb-2">Manufacturer</label>
+                        <input type="text" id="manufacturer" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Cipla Ltd.">
+                    </div>
+                    
+                    <!-- Batch Number -->
+                    <div>
+                        <label for="batch-number" class="block text-gray-700 font-medium mb-2">Batch Number *</label>
+                        <input type="text" id="batch-number" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., PC-2023-001" required>
+                    </div>
+                    
+                    <!-- Current Stock -->
+                    <div>
+                        <label for="current-stock" class="block text-gray-700 font-medium mb-2">Current Stock *</label>
+                        <input type="number" id="current-stock" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 50" min="0" required>
+                    </div>
+                    
+                    <!-- Reorder Level -->
+                    <div>
+                        <label for="reorder-level" class="block text-gray-700 font-medium mb-2">Reorder Level *</label>
+                        <input type="number" id="reorder-level" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 20" min="0" required>
+                    </div>
+                    
+                    <!-- Unit Price -->
+                    <div>
+                        <label for="unit-price" class="block text-gray-700 font-medium mb-2">Unit Price (₹) *</label>
+                        <input type="number" id="unit-price" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 25.50" min="0" step="0.01" required>
+                    </div>
+                    
+                    <!-- Expiry Date -->
+                    <div>
+                        <label for="expiry-date" class="block text-gray-700 font-medium mb-2">Expiry Date *</label>
+                        <input type="text" id="expiry-date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Select Date" required>
+                    </div>
+                </div>
+                
+                <!-- Storage Instructions -->
+                <div class="mb-6">
+                    <label for="storage" class="block text-gray-700 font-medium mb-2">Storage Instructions</label>
+                    <textarea id="storage" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Store in a cool, dry place away from direct sunlight"></textarea>
+                </div>
+                
+                <!-- Notes -->
+                <div class="mb-8">
+                    <label for="notes" class="block text-gray-700 font-medium mb-2">Additional Notes</label>
+                    <textarea id="notes" rows="2" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Any additional information..."></textarea>
+                </div>
+                
+                <!-- Form Buttons -->
+                <div class="flex justify-end space-x-4">
+                    <button type="button" class="close-modal px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition duration-300">
+                        Save Medicine
+                    </button>
+                </div>
+                
+                <!-- Hidden ID for editing -->
+                <input type="hidden" id="medicine-id" value="">
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Sample medicine data
+        let medicines = [
+            {
+                id: 1,
+                name: "Paracetamol 500mg",
+                generic: "Acetaminophen",
+                type: "tablet",
+                category: "analgesic",
+                manufacturer: "Cipla Ltd.",
+                batch: "PC-2023-001",
+                stock: 42,
+                reorderLevel: 20,
+                unitPrice: 2.50,
+                expiryDate: "2024-06-15",
+                storage: "Store in a cool, dry place",
+                notes: "",
+                addedDate: "2023-01-15"
+            },
+            {
+                id: 2,
+                name: "Amoxicillin 250mg Capsules",
+                generic: "Amoxicillin",
+                type: "capsule",
+                category: "antibiotic",
+                manufacturer: "Sun Pharma",
+                batch: "AM-2023-005",
+                stock: 8,
+                reorderLevel: 25,
+                unitPrice: 45.00,
+                expiryDate: "2023-11-30",
+                storage: "Store below 25°C",
+                notes: "Keep away from moisture",
+                addedDate: "2023-03-10"
+            },
+            {
+                id: 3,
+                name: "Cetirizine 10mg Tablets",
+                generic: "Cetirizine Hydrochloride",
+                type: "tablet",
+                category: "antihistamine",
+                manufacturer: "Dr. Reddy's",
+                batch: "CT-2023-012",
+                stock: 65,
+                reorderLevel: 20,
+                unitPrice: 12.75,
+                expiryDate: "2024-09-20",
+                storage: "Room temperature",
+                notes: "",
+                addedDate: "2023-02-28"
+            },
+            {
+                id: 4,
+                name: "Omeprazole 20mg Capsules",
+                generic: "Omeprazole",
+                type: "capsule",
+                category: "gastrointestinal",
+                manufacturer: "Mylan",
+                batch: "OM-2023-008",
+                stock: 12,
+                reorderLevel: 15,
+                unitPrice: 28.50,
+                expiryDate: "2023-12-05",
+                storage: "Store in original packaging",
+                notes: "Protect from light",
+                addedDate: "2023-04-05"
+            },
+            {
+                id: 5,
+                name: "Atorvastatin 10mg Tablets",
+                generic: "Atorvastatin Calcium",
+                type: "tablet",
+                category: "cardiovascular",
+                manufacturer: "Lupin",
+                batch: "AT-2023-015",
+                stock: 32,
+                reorderLevel: 20,
+                unitPrice: 35.25,
+                expiryDate: "2025-01-10",
+                storage: "Store below 30°C",
+                notes: "",
+                addedDate: "2023-05-12"
+            },
+            {
+                id: 6,
+                name: "Metformin 500mg Tablets",
+                generic: "Metformin Hydrochloride",
+                type: "tablet",
+                category: "diabetes",
+                manufacturer: "Zydus Cadila",
+                batch: "MF-2023-003",
+                stock: 54,
+                reorderLevel: 30,
+                unitPrice: 18.90,
+                expiryDate: "2024-08-25",
+                storage: "Keep container tightly closed",
+                notes: "",
+                addedDate: "2023-03-22"
+            },
+            {
+                id: 7,
+                name: "Ibuprofen 400mg Tablets",
+                generic: "Ibuprofen",
+                type: "tablet",
+                category: "analgesic",
+                manufacturer: "GlaxoSmithKline",
+                batch: "IB-2023-009",
+                stock: 15,
+                reorderLevel: 20,
+                unitPrice: 8.75,
+                expiryDate: "2023-10-18",
+                storage: "Store at room temperature",
+                notes: "",
+                addedDate: "2023-06-10"
+            },
+            {
+                id: 8,
+                name: "Salbutamol Inhaler 100mcg",
+                generic: "Salbutamol",
+                type: "inhaler",
+                category: "respiratory",
+                manufacturer: "Cipla Ltd.",
+                batch: "SB-2023-004",
+                stock: 22,
+                reorderLevel: 10,
+                unitPrice: 125.00,
+                expiryDate: "2024-03-30",
+                storage: "Store with mouthpiece down",
+                notes: "Shake well before use",
+                addedDate: "2023-02-15"
+            },
+            {
+                id: 9,
+                name: "Vitamin C 500mg Tablets",
+                generic: "Ascorbic Acid",
+                type: "tablet",
+                category: "vitamin",
+                manufacturer: "Dabur",
+                batch: "VC-2023-011",
+                stock: 28,
+                reorderLevel: 15,
+                unitPrice: 6.50,
+                expiryDate: "2023-09-30",
+                storage: "Protect from moisture",
+                notes: "",
+                addedDate: "2023-01-30"
+            },
+            {
+                id: 10,
+                name: "Aspirin 75mg Tablets",
+                generic: "Acetylsalicylic Acid",
+                type: "tablet",
+                category: "cardiovascular",
+                manufacturer: "Bayer",
+                batch: "AS-2023-006",
+                stock: 40,
+                reorderLevel: 25,
+                unitPrice: 15.25,
+                expiryDate: "2024-11-15",
+                storage: "Keep in original packaging",
+                notes: "",
+                addedDate: "2023-04-18"
+            },
+            {
+                id: 11,
+                name: "Cough Syrup 100ml",
+                generic: "Dextromethorphan",
+                type: "syrup",
+                category: "respiratory",
+                manufacturer: "Himalaya",
+                batch: "CS-2023-007",
+                stock: 18,
+                reorderLevel: 12,
+                unitPrice: 85.00,
+                expiryDate: "2023-08-10",
+                storage: "Store below 25°C",
+                notes: "Shake well before use",
+                addedDate: "2023-03-05"
+            },
+            {
+                id: 12,
+                name: "Insulin Glargine 100IU/ml",
+                generic: "Insulin Glargine",
+                type: "injection",
+                category: "diabetes",
+                manufacturer: "Sanofi",
+                batch: "IN-2023-002",
+                stock: 5,
+                reorderLevel: 8,
+                unitPrice: 425.00,
+                expiryDate: "2023-07-20",
+                storage: "Refrigerate at 2-8°C",
+                notes: "Do not freeze",
+                addedDate: "2023-01-10"
+            }
+        ];
+
+        // Current date for calculations
+        const currentDate = new Date();
+        
+        // Initialize variables for pagination
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let filteredMedicines = [...medicines];
+        
+        // DOM Elements
+        const medicineTableBody = document.getElementById('medicine-table-body');
+        const searchInput = document.getElementById('search-medicine');
+        const clearSearchBtn = document.getElementById('clear-search');
+        const filterType = document.getElementById('filter-type');
+        const filterStatus = document.getElementById('filter-status');
+        const filterExpiry = document.getElementById('filter-expiry');
+        const filterCategory = document.getElementById('filter-category');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const activeFiltersDiv = document.getElementById('active-filters');
+        const medicineCount = document.getElementById('medicine-count');
+        const filteredCount = document.getElementById('filtered-count');
+        const noResultsDiv = document.getElementById('no-results');
+        const resetFiltersBtn = document.getElementById('reset-filters');
+        const sortBy = document.getElementById('sort-by');
+        const itemsPerPageSelect = document.getElementById('items-per-page');
+        const prevPageBtn = document.getElementById('prev-page');
+        const nextPageBtn = document.getElementById('next-page');
+        const pageNumbersDiv = document.getElementById('page-numbers');
+        const addMedicineBtn = document.getElementById('add-medicine-btn');
+        const medicineModal = document.getElementById('medicine-modal');
+        const closeModalBtns = document.querySelectorAll('.close-modal');
+        const medicineForm = document.getElementById('medicine-form');
+        const modalTitle = document.getElementById('modal-title');
+        const currentDateDisplay = document.getElementById('current-date');
+        const lastUpdatedDisplay = document.getElementById('last-updated');
+        const expiredList = document.getElementById('expired-list');
+        const expiringSoonList = document.getElementById('expiring-soon-list');
+        const lowStockList = document.getElementById('low-stock-list');
+        
+        // Format date to display
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+        
+        // Calculate days until expiry
+        function daysUntilExpiry(expiryDate) {
+            const expiry = new Date(expiryDate);
+            const diffTime = expiry - currentDate;
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+        
+        // Get expiry status
+        function getExpiryStatus(expiryDate) {
+            const days = daysUntilExpiry(expiryDate);
+            
+            if (days < 0) {
+                return { status: 'expired', text: 'Expired', class: 'bg-red-100 text-red-600' };
+            } else if (days <= 30) {
+                return { status: 'expiring-soon', text: `Expires in ${days} days`, class: 'bg-yellow-100 text-yellow-600' };
+            } else {
+                return { status: 'good', text: `Expires in ${days} days`, class: 'bg-green-100 text-green-600' };
+            }
+        }
+        
+        // Get stock status
+        function getStockStatus(stock, reorderLevel) {
+            if (stock === 0) {
+                return { status: 'out-of-stock', text: 'Out of Stock', class: 'bg-gray-100 text-gray-600' };
+            } else if (stock <= reorderLevel) {
+                return { status: 'low-stock', text: 'Low Stock', class: 'bg-red-100 text-red-600' };
+            } else if (stock <= reorderLevel * 1.5) {
+                return { status: 'warning', text: 'Moderate Stock', class: 'bg-yellow-100 text-yellow-600' };
+            } else {
+                return { status: 'in-stock', text: 'In Stock', class: 'bg-green-100 text-green-600' };
+            }
+        }
+        
+        // Filter medicines based on search and filters
+        function filterMedicines() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const typeFilter = filterType.value;
+            const statusFilter = filterStatus.value;
+            const expiryFilter = filterExpiry.value;
+            const categoryFilter = filterCategory.value;
+            
+            filteredMedicines = medicines.filter(medicine => {
+                // Search filter
+                const matchesSearch = searchTerm === '' || 
+                    medicine.name.toLowerCase().includes(searchTerm) ||
+                    medicine.generic.toLowerCase().includes(searchTerm) ||
+                    medicine.batch.toLowerCase().includes(searchTerm) ||
+                    medicine.manufacturer.toLowerCase().includes(searchTerm);
+                
+                // Type filter
+                const matchesType = typeFilter === 'all' || medicine.type === typeFilter;
+                
+                // Category filter
+                const matchesCategory = categoryFilter === 'all' || medicine.category === categoryFilter;
+                
+                // Stock status filter
+                const stockStatus = getStockStatus(medicine.stock, medicine.reorderLevel);
+                const matchesStatus = statusFilter === 'all' || stockStatus.status === statusFilter;
+                
+                // Expiry filter
+                const expiryStatus = getExpiryStatus(medicine.expiryDate);
+                const matchesExpiry = expiryFilter === 'all' || expiryStatus.status === expiryFilter;
+                
+                return matchesSearch && matchesType && matchesStatus && matchesExpiry && matchesCategory;
+            });
+            
+            // Update active filters display
+            updateActiveFiltersDisplay(searchTerm, typeFilter, statusFilter, expiryFilter, categoryFilter);
+            
+            // Update medicine count
+            updateMedicineCount();
+            
+            // Reset to page 1 when filtering
+            currentPage = 1;
+            
+            // Sort medicines
+            sortMedicines();
+            
+            // Render table
+            renderMedicineTable();
+            
+            // Update pagination
+            updatePagination();
+            
+            // Update expiry alerts
+            updateExpiryAlerts();
+        }
+        
+        // Update active filters display
+        function updateActiveFiltersDisplay(searchTerm, typeFilter, statusFilter, expiryFilter, categoryFilter) {
+            activeFiltersDiv.innerHTML = '';
+            
+            // Add search term if present
+            if (searchTerm) {
+                const searchChip = document.createElement('span');
+                searchChip.className = 'px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm flex items-center';
+                searchChip.innerHTML = `Search: "${searchTerm}" <button class="ml-2 text-blue-400 hover:text-blue-600" data-clear="search"><i class="fas fa-times"></i></button>`;
+                activeFiltersDiv.appendChild(searchChip);
+            }
+            
+            // Add type filter if not 'all'
+            if (typeFilter !== 'all') {
+                const typeChip = document.createElement('span');
+                typeChip.className = 'px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm flex items-center';
+                typeChip.innerHTML = `Type: ${typeFilter} <button class="ml-2 text-blue-400 hover:text-blue-600" data-clear="type"><i class="fas fa-times"></i></button>`;
+                activeFiltersDiv.appendChild(typeChip);
+            }
+            
+            // Add status filter if not 'all'
+            if (statusFilter !== 'all') {
+                const statusChip = document.createElement('span');
+                statusChip.className = 'px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm flex items-center';
+                statusChip.innerHTML = `Stock: ${statusFilter.replace('-', ' ')} <button class="ml-2 text-blue-400 hover:text-blue-600" data-clear="status"><i class="fas fa-times"></i></button>`;
+                activeFiltersDiv.appendChild(statusChip);
+            }
+            
+            // Add expiry filter if not 'all'
+            if (expiryFilter !== 'all') {
+                const expiryChip = document.createElement('span');
+                expiryChip.className = 'px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm flex items-center';
+                expiryChip.innerHTML = `Expiry: ${expiryFilter.replace('-', ' ')} <button class="ml-2 text-blue-400 hover:text-blue-600" data-clear="expiry"><i class="fas fa-times"></i></button>`;
+                activeFiltersDiv.appendChild(expiryChip);
+            }
+            
+            // Add category filter if not 'all'
+            if (categoryFilter !== 'all') {
+                const categoryChip = document.createElement('span');
+                categoryChip.className = 'px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm flex items-center';
+                categoryChip.innerHTML = `Category: ${categoryFilter} <button class="ml-2 text-blue-400 hover:text-blue-600" data-clear="category"><i class="fas fa-times"></i></button>`;
+                activeFiltersDiv.appendChild(categoryChip);
+            }
+            
+            // Show/hide active filters div
+            if (activeFiltersDiv.children.length > 0) {
+                activeFiltersDiv.classList.remove('hidden');
+            } else {
+                activeFiltersDiv.classList.add('hidden');
+            }
+            
+            // Add event listeners to clear buttons
+            activeFiltersDiv.querySelectorAll('button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const clearType = this.getAttribute('data-clear');
+                    
+                    switch(clearType) {
+                        case 'search':
+                            searchInput.value = '';
+                            break;
+                        case 'type':
+                            filterType.value = 'all';
+                            break;
+                        case 'status':
+                            filterStatus.value = 'all';
+                            break;
+                        case 'expiry':
+                            filterExpiry.value = 'all';
+                            break;
+                        case 'category':
+                            filterCategory.value = 'all';
+                            break;
+                    }
+                    
+                    filterMedicines();
+                });
+            });
+        }
+        
+        // Update medicine count display
+        function updateMedicineCount() {
+            const totalMedicines = medicines.length;
+            const filteredCountValue = filteredMedicines.length;
+            
+            medicineCount.textContent = filteredCountValue;
+            
+            if (filteredCountValue < totalMedicines) {
+                filteredCount.classList.remove('hidden');
+            } else {
+                filteredCount.classList.add('hidden');
+            }
+            
+            // Show/hide no results message
+            if (filteredCountValue === 0) {
+                noResultsDiv.classList.remove('hidden');
+            } else {
+                noResultsDiv.classList.add('hidden');
+            }
+        }
+        
+        // Sort medicines
+        function sortMedicines() {
+            const sortByValue = sortBy.value;
+            
+            filteredMedicines.sort((a, b) => {
+                switch(sortByValue) {
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    case 'expiry':
+                        return new Date(a.expiryDate) - new Date(b.expiryDate);
+                    case 'stock':
+                        return a.stock - b.stock;
+                    case 'category':
+                        return a.category.localeCompare(b.category);
+                    default:
+                        return 0;
+                }
+            });
+        }
+        
+        // Render medicine table
+        function renderMedicineTable() {
+            // Calculate start and end indices for pagination
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredMedicines.length);
+            const medicinesToDisplay = filteredMedicines.slice(startIndex, endIndex);
+            
+            medicineTableBody.innerHTML = '';
+            
+            medicinesToDisplay.forEach(medicine => {
+                const expiryStatus = getExpiryStatus(medicine.expiryDate);
+                const stockStatus = getStockStatus(medicine.stock, medicine.reorderLevel);
+                const daysUntilExp = daysUntilExpiry(medicine.expiryDate);
+                
+                // Determine row class based on expiry
+                let rowClass = '';
+                if (expiryStatus.status === 'expired') {
+                    rowClass = 'bg-red-50';
+                } else if (expiryStatus.status === 'expiring-soon') {
+                    rowClass = 'bg-yellow-50';
+                }
+                
+                const row = document.createElement('tr');
+                row.className = `medicine-card border-b ${rowClass}`;
+                row.innerHTML = `
+                    <td class="p-4">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 ${medicine.type === 'tablet' ? 'bg-blue-100' : medicine.type === 'capsule' ? 'bg-purple-100' : 'bg-green-100'} rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas ${medicine.type === 'tablet' ? 'fa-tablet-alt' : medicine.type === 'capsule' ? 'fa-capsules' : medicine.type === 'syrup' ? 'fa-flask' : medicine.type === 'injection' ? 'fa-syringe' : 'fa-pills'} ${medicine.type === 'tablet' ? 'text-blue-600' : medicine.type === 'capsule' ? 'text-purple-600' : 'text-green-600'}"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-800">${medicine.name}</p>
+                                <p class="text-sm text-gray-500">${medicine.generic}</p>
+                                <div class="flex flex-wrap gap-1 mt-1">
+                                    <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">${medicine.batch}</span>
+                                    <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">${medicine.manufacturer}</span>
+                                    <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">${medicine.category}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <div>
+                            <p class="font-medium ${stockStatus.status === 'low-stock' || stockStatus.status === 'out-of-stock' ? 'text-red-600' : 'text-gray-800'}">${medicine.stock} units</p>
+                            <div class="w-32 bg-gray-200 rounded-full h-2 mt-1">
+                                <div class="h-2 rounded-full ${medicine.stock <= medicine.reorderLevel ? 'bg-red-500' : medicine.stock <= medicine.reorderLevel * 1.5 ? 'bg-yellow-500' : 'bg-green-500'}" 
+                                     style="width: ${Math.min(100, (medicine.stock / (medicine.reorderLevel * 2)) * 100)}%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Reorder at ${medicine.reorderLevel} units</p>
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <div>
+                            <p class="font-medium ${expiryStatus.status === 'expired' ? 'text-red-600' : expiryStatus.status === 'expiring-soon' ? 'text-yellow-600' : 'text-gray-800'}">${formatDate(medicine.expiryDate)}</p>
+                            <span class="px-2 py-1 ${expiryStatus.class} rounded-full text-xs mt-1 inline-block">${expiryStatus.text}</span>
+                            ${daysUntilExp < 60 ? `<p class="text-xs ${daysUntilExp < 0 ? 'text-red-500' : 'text-yellow-500'} mt-1">${Math.abs(daysUntilExp)} days ${daysUntilExp < 0 ? 'ago' : 'remaining'}</p>` : ''}
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <div class="space-y-1">
+                            <span class="px-3 py-1 ${stockStatus.class} rounded-full text-xs">${stockStatus.text}</span>
+                            <span class="px-3 py-1 ${expiryStatus.class} rounded-full text-xs block">${expiryStatus.text}</span>
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <div class="flex space-x-2">
+                            <button class="edit-btn text-blue-600 hover:text-blue-800 p-2" data-id="${medicine.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="add-stock-btn text-green-600 hover:text-green-800 p-2" data-id="${medicine.id}">
+                                <i class="fas fa-plus-circle"></i>
+                            </button>
+                            <button class="delete-btn text-red-600 hover:text-red-800 p-2" data-id="${medicine.id}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                medicineTableBody.appendChild(row);
+            });
+            
+            // Add event listeners to action buttons
+            addEventListenersToButtons();
+        }
+        
+        // Update pagination
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredMedicines.length / itemsPerPage);
+            
+            // Clear previous page numbers
+            pageNumbersDiv.innerHTML = '';
+            
+            // Create page number buttons
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `w-10 h-10 flex items-center justify-center rounded-lg ${i === currentPage ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`;
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => {
+                    currentPage = i;
+                    renderMedicineTable();
+                    updatePagination();
+                });
+                pageNumbersDiv.appendChild(pageBtn);
+            }
+            
+            // Enable/disable prev/next buttons
+            prevPageBtn.disabled = currentPage === 1;
+            prevPageBtn.classList.toggle('opacity-50', currentPage === 1);
+            prevPageBtn.classList.toggle('cursor-not-allowed', currentPage === 1);
+            
+            nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+            nextPageBtn.classList.toggle('opacity-50', currentPage === totalPages || totalPages === 0);
+            nextPageBtn.classList.toggle('cursor-not-allowed', currentPage === totalPages || totalPages === 0);
+        }
+        
+        // Update expiry alerts
+        function updateExpiryAlerts() {
+            // Clear lists
+            expiredList.innerHTML = '';
+            expiringSoonList.innerHTML = '';
+            lowStockList.innerHTML = '';
+            
+            let expiredCount = 0;
+            let expiringSoonCount = 0;
+            let lowStockCount = 0;
+            
+            // Sort medicines by expiry date (soonest first)
+            const sortedMedicines = [...medicines].sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+            
+            sortedMedicines.forEach(medicine => {
+                const expiryStatus = getExpiryStatus(medicine.expiryDate);
+                const stockStatus = getStockStatus(medicine.stock, medicine.reorderLevel);
+                const days = daysUntilExpiry(medicine.expiryDate);
+                
+                // Add to expired list
+                if (expiryStatus.status === 'expired') {
+                    expiredCount++;
+                    if (expiredCount <= 5) {
+                        const li = document.createElement('li');
+                        li.className = 'flex justify-between items-center';
+                        li.innerHTML = `
+                            <span class="font-medium">${medicine.name}</span>
+                            <span class="text-sm text-gray-600">${formatDate(medicine.expiryDate)}</span>
+                        `;
+                        expiredList.appendChild(li);
+                    }
+                }
+                
+                // Add to expiring soon list
+                if (expiryStatus.status === 'expiring-soon') {
+                    expiringSoonCount++;
+                    if (expiringSoonCount <= 5) {
+                        const li = document.createElement('li');
+                        li.className = 'flex justify-between items-center';
+                        li.innerHTML = `
+                            <span class="font-medium">${medicine.name}</span>
+                            <span class="text-sm text-gray-600">${days} days</span>
+                        `;
+                        expiringSoonList.appendChild(li);
+                    }
+                }
+                
+                // Add to low stock list
+                if (stockStatus.status === 'low-stock' || stockStatus.status === 'out-of-stock') {
+                    lowStockCount++;
+                    if (lowStockCount <= 5) {
+                        const li = document.createElement('li');
+                        li.className = 'flex justify-between items-center';
+                        li.innerHTML = `
+                            <span class="font-medium">${medicine.name}</span>
+                            <span class="text-sm ${stockStatus.status === 'out-of-stock' ? 'text-red-600' : 'text-yellow-600'}">${medicine.stock} units</span>
+                        `;
+                        lowStockList.appendChild(li);
+                    }
+                }
+            });
+            
+            // Add "view more" links if needed
+            if (expiredCount > 5) {
+                const li = document.createElement('li');
+                li.className = 'text-center pt-2';
+                li.innerHTML = `<a href="#" class="text-sm text-red-600 hover:underline">+ ${expiredCount - 5} more expired</a>`;
+                expiredList.appendChild(li);
+            }
+            
+            if (expiringSoonCount > 5) {
+                const li = document.createElement('li');
+                li.className = 'text-center pt-2';
+                li.innerHTML = `<a href="#" class="text-sm text-yellow-600 hover:underline">+ ${expiringSoonCount - 5} more expiring soon</a>`;
+                expiringSoonList.appendChild(li);
+            }
+            
+            if (lowStockCount > 5) {
+                const li = document.createElement('li');
+                li.className = 'text-center pt-2';
+                li.innerHTML = `<a href="#" class="text-sm text-green-600 hover:underline">+ ${lowStockCount - 5} more low stock</a>`;
+                lowStockList.appendChild(li);
+            }
+        }
+        
+        // Add event listeners to action buttons
+        function addEventListenersToButtons() {
+            // Edit buttons
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const medicineId = parseInt(this.getAttribute('data-id'));
+                    const medicine = medicines.find(m => m.id === medicineId);
+                    
+                    if (medicine) {
+                        openMedicineModal(medicine);
+                    }
+                });
+            });
+            
+            // Add stock buttons
+            document.querySelectorAll('.add-stock-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const medicineId = parseInt(this.getAttribute('data-id'));
+                    const medicine = medicines.find(m => m.id === medicineId);
+                    
+                    if (medicine) {
+                        const newStock = prompt(`Add stock to ${medicine.name}\nCurrent stock: ${medicine.stock} units\nEnter additional units:`, "10");
+                        
+                        if (newStock && !isNaN(newStock) && parseInt(newStock) > 0) {
+                            medicine.stock += parseInt(newStock);
+                            filterMedicines();
+                            alert(`Added ${newStock} units to ${medicine.name}. New stock: ${medicine.stock} units.`);
+                        }
+                    }
+                });
+            });
+            
+            // Delete buttons
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const medicineId = parseInt(this.getAttribute('data-id'));
+                    const medicine = medicines.find(m => m.id === medicineId);
+                    
+                    if (medicine) {
+                        if (confirm(`Are you sure you want to delete ${medicine.name} (${medicine.batch}) from inventory?`)) {
+                            medicines = medicines.filter(m => m.id !== medicineId);
+                            filterMedicines();
+                            alert(`${medicine.name} has been deleted from inventory.`);
+                        }
+                    }
+                });
+            });
+        }
+        
+        // Open medicine modal for editing or adding
+        function openMedicineModal(medicine = null) {
+            if (medicine) {
+                // Editing existing medicine
+                modalTitle.textContent = 'Edit Medicine';
+                document.getElementById('medicine-id').value = medicine.id;
+                document.getElementById('medicine-name').value = medicine.name;
+                document.getElementById('generic-name').value = medicine.generic;
+                document.getElementById('medicine-type').value = medicine.type;
+                document.getElementById('category').value = medicine.category;
+                document.getElementById('manufacturer').value = medicine.manufacturer;
+                document.getElementById('batch-number').value = medicine.batch;
+                document.getElementById('current-stock').value = medicine.stock;
+                document.getElementById('reorder-level').value = medicine.reorderLevel;
+                document.getElementById('unit-price').value = medicine.unitPrice;
+                document.getElementById('expiry-date').value = medicine.expiryDate;
+                document.getElementById('storage').value = medicine.storage;
+                document.getElementById('notes').value = medicine.notes;
+            } else {
+                // Adding new medicine
+                modalTitle.textContent = 'Add New Medicine';
+                medicineForm.reset();
+                document.getElementById('medicine-id').value = '';
+                document.getElementById('expiry-date').value = '';
+            }
+            
+            medicineModal.style.display = 'block';
+        }
+        
+        // Close medicine modal
+        function closeMedicineModal() {
+            medicineModal.style.display = 'none';
+            medicineForm.reset();
+        }
+        
+        // Initialize date picker for expiry date
+        flatpickr("#expiry-date", {
+            minDate: "today",
+            dateFormat: "Y-m-d",
+            defaultDate: "today"
+        });
+        
+        // Initialize current date display
+        function updateCurrentDate() {
+            const now = new Date();
+            currentDateDisplay.textContent = now.toLocaleDateString('en-IN', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+        
+        // Event Listeners
+        searchInput.addEventListener('input', filterMedicines);
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            filterMedicines();
+        });
+        
+        filterType.addEventListener('change', filterMedicines);
+        filterStatus.addEventListener('change', filterMedicines);
+        filterExpiry.addEventListener('change', filterMedicines);
+        filterCategory.addEventListener('change', filterMedicines);
+        
+        filterBtns.forEach(button => {
+            button.addEventListener('click', function() {
+                const filter = this.getAttribute('data-filter');
+                
+                // Remove active class from all filter buttons
+                filterBtns.forEach(btn => {
+                    btn.classList.remove('filter-active');
+                });
+                
+                // Add active class to clicked button
+                this.classList.add('filter-active');
+                
+                // Apply filter
+                switch(filter) {
+                    case 'low-stock':
+                        filterStatus.value = 'low-stock';
+                        break;
+                    case 'expiring-soon':
+                        filterExpiry.value = 'expiring-soon';
+                        break;
+                    case 'expired':
+                        filterExpiry.value = 'expired';
+                        break;
+                    case 'need-reorder':
+                        filterStatus.value = 'low-stock';
+                        break;
+                }
+                
+                filterMedicines();
+                
+                // Remove active class after 2 seconds
+                setTimeout(() => {
+                    this.classList.remove('filter-active');
+                }, 2000);
+            });
+        });
+        
+        resetFiltersBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            filterType.value = 'all';
+            filterStatus.value = 'all';
+            filterExpiry.value = 'all';
+            filterCategory.value = 'all';
+            sortBy.value = 'name';
+            itemsPerPageSelect.value = '10';
+            itemsPerPage = 10;
+            currentPage = 1;
+            
+            filterMedicines();
+        });
+        
+        sortBy.addEventListener('change', () => {
+            sortMedicines();
+            renderMedicineTable();
+        });
+        
+        itemsPerPageSelect.addEventListener('change', () => {
+            itemsPerPage = parseInt(itemsPerPageSelect.value);
+            currentPage = 1;
+            filterMedicines();
+        });
+        
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderMedicineTable();
+                updatePagination();
+            }
+        });
+        
+        nextPageBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredMedicines.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderMedicineTable();
+                updatePagination();
+            }
+        });
+        
+        addMedicineBtn.addEventListener('click', () => openMedicineModal());
+        
+        closeModalBtns.forEach(btn => {
+            btn.addEventListener('click', closeMedicineModal);
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', (event) => {
+            if (event.target === medicineModal) {
+                closeMedicineModal();
+            }
+        });
+        
+        // Handle form submission
+        medicineForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            
+            const medicineId = document.getElementById('medicine-id').value;
+            const isEditing = medicineId !== '';
+            
+            // Get form values
+            const medicineData = {
+                id: isEditing ? parseInt(medicineId) : medicines.length > 0 ? Math.max(...medicines.map(m => m.id)) + 1 : 1,
+                name: document.getElementById('medicine-name').value,
+                generic: document.getElementById('generic-name').value,
+                type: document.getElementById('medicine-type').value,
+                category: document.getElementById('category').value,
+                manufacturer: document.getElementById('manufacturer').value,
+                batch: document.getElementById('batch-number').value,
+                stock: parseInt(document.getElementById('current-stock').value),
+                reorderLevel: parseInt(document.getElementById('reorder-level').value),
+                unitPrice: parseFloat(document.getElementById('unit-price').value),
+                expiryDate: document.getElementById('expiry-date').value,
+                storage: document.getElementById('storage').value,
+                notes: document.getElementById('notes').value,
+                addedDate: isEditing ? medicines.find(m => m.id === parseInt(medicineId)).addedDate : new Date().toISOString().split('T')[0]
+            };
+            
+            if (isEditing) {
+                // Update existing medicine
+                const index = medicines.findIndex(m => m.id === parseInt(medicineId));
+                if (index !== -1) {
+                    medicines[index] = medicineData;
+                    alert('Medicine updated successfully!');
+                }
+            } else {
+                // Add new medicine
+                medicines.push(medicineData);
+                alert('Medicine added successfully!');
+            }
+            
+            // Close modal and refresh table
+            closeMedicineModal();
+            filterMedicines();
+        });
+        
+        // Initialize
+        updateCurrentDate();
+        filterMedicines();
+        
+        // Update last updated time
+        function updateLastUpdated() {
+            const now = new Date();
+            lastUpdatedDisplay.textContent = now.toLocaleTimeString('en-IN', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        updateLastUpdated();
+        setInterval(updateLastUpdated, 60000); // Update every minute
+    </script>
+</body>
+</html>
